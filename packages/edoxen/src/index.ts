@@ -113,6 +113,8 @@ export * from './body/index.js'
 export * from './validate/index.js'
 export * from './config/index.js'
 export * from './domain/index.js'
+export * from './result/index.js'
+export * from './project/index.js'
 
 export { asciidocify } from './utils/asciidoc.js'
 export {

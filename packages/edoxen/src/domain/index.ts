@@ -26,7 +26,21 @@ export interface DecisionViewModel {
   approvals: Decision['approvals']
 }
 
+// Memoised view-model factories. Source objects are immutable per
+// the schema, so caching by reference is safe. The WeakMap GCs when
+// the source is no longer referenced.
+const decisionVmCache = new WeakMap<Decision, DecisionViewModel>()
+const meetingVmCache = new WeakMap<object, MeetingViewModel>()
+
 export function presentDecision(decision: Decision): DecisionViewModel {
+  const cached = decisionVmCache.get(decision)
+  if (cached) return cached
+  const vm = buildDecisionVm(decision)
+  decisionVmCache.set(decision, vm)
+  return vm
+}
+
+function buildDecisionVm(decision: Decision): DecisionViewModel {
   const identifier = identifierToDisplay(decision.identifier)
   const id = identifier.replace(/\//g, '-')
   const acclamation = isAcclamation(identifier)
@@ -143,6 +157,19 @@ export interface MeetingViewModel {
 }
 
 export function presentMeeting(meeting: Meeting, opts: { title?: string } = {}): MeetingViewModel {
+  // Meeting objects come from the loaders as plain objects; cast
+  // through object so WeakMap keying works regardless of identity.
+  const cacheKey = meeting as unknown as object
+  const cacheOpts = `${opts.title ?? ''}`
+  type CachedMeeting = { vm: MeetingViewModel; opts: string }
+  const existing = meetingVmCache.get(cacheKey) as CachedMeeting | undefined
+  if (existing && existing.opts === cacheOpts) return existing.vm
+  const vm = buildMeetingVm(meeting, opts)
+  meetingVmCache.set(cacheKey, { vm, opts: cacheOpts } as unknown as MeetingViewModel)
+  return vm
+}
+
+function buildMeetingVm(meeting: Meeting, opts: { title?: string }): MeetingViewModel {
   const urn = meeting.urn ?? ''
   const slug = urn.match(/:meeting:([-\w]+)$/)?.[1] ?? ''
   const dr = (meeting.date_range ?? {}) as { start?: string; end?: string }
