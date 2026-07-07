@@ -6,7 +6,7 @@
 
 import { computed, type ComputedRef } from 'vue'
 import { createListCollection } from './createCollection.js'
-import type { Decision } from 'edoxen'
+import type { Decision } from '@edoxen/edoxen'
 
 export interface UseDecisionsResult {
   items: ComputedRef<Decision[]>

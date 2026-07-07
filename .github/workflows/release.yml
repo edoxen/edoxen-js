@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       packages:
-        description: 'Which packages to publish (all | edoxen | @edoxen/vue)'
+        description: 'Comma-separated list (all | @edoxen/edoxen | @edoxen/vue | @edoxen/astro)'
         required: false
         default: 'all'
 
@@ -32,13 +32,18 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r --filter='./packages/*' build
       - run: pnpm -r test
-      - name: Publish edoxen
-        if: inputs.packages == 'all' || inputs.packages == 'edoxen'
-        run: pnpm -F edoxen publish --access public --no-git-checks
+      - name: Publish @edoxen/edoxen
+        if: inputs.packages == 'all' || contains(inputs.packages, '@edoxen/edoxen')
+        run: pnpm -F '@edoxen/edoxen' publish --access public --no-git-checks --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish @edoxen/vue
-        if: inputs.packages == 'all' || inputs.packages == '@edoxen/vue'
-        run: pnpm -F @edoxen/vue publish --access public --no-git-checks
+        if: inputs.packages == 'all' || contains(inputs.packages, '@edoxen/vue')
+        run: pnpm -F '@edoxen/vue' publish --access public --no-git-checks --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish @edoxen/astro
+        if: inputs.packages == 'all' || contains(inputs.packages, '@edoxen/astro')
+        run: pnpm -F '@edoxen/astro' publish --access public --no-git-checks --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -22,7 +22,7 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['vue', 'edoxen'],
+      external: ['vue', '@edoxen/edoxen'],
     },
   },
 })

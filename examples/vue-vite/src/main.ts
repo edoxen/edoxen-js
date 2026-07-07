@@ -9,7 +9,7 @@
 
 import { createApp, h, defineComponent } from 'vue'
 import { useDecisions, ResolutionList, EmptyState, useCountUp } from '@edoxen/vue'
-import { presentDecision, actionTypeFacets, yearRange } from 'edoxen'
+import { presentDecision, actionTypeFacets, yearRange } from '@edoxen/edoxen'
 
 const App = defineComponent({
   setup() {

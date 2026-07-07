@@ -2,7 +2,7 @@
 // ActionTypeBadge — pill that renders the action verb in title-case.
 
 import { computed } from 'vue'
-import { actionTypeLabel } from 'edoxen'
+import { actionTypeLabel } from '@edoxen/edoxen'
 
 const props = defineProps<{ type?: string | null }>()
 

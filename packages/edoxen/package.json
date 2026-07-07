@@ -1,5 +1,5 @@
 {
-  "name": "edoxen",
+  "name": "@edoxen/edoxen",
   "version": "0.1.0",
   "description": "Framework-agnostic TypeScript data layer for the Edoxen meeting/decision information model. JSON-Schema-driven types, YAML loaders, transforms, search, URN, i18n, and validate helpers.",
   "type": "module",
@@ -67,8 +67,7 @@
     "url": "https://github.com/edoxen/edoxen-js/issues"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "dependencies": {
     "@asciidoctor/core": "^4.0.2",

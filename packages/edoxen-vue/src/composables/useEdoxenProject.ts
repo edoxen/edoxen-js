@@ -3,7 +3,7 @@
 // fetch completes.
 
 import { computed, ref, type Ref, watch } from 'vue'
-import { buildProject, type EdoxenProject, type Decision, type Meeting, type MeetingSeries } from 'edoxen'
+import { buildProject, type EdoxenProject, type Decision, type Meeting, type MeetingSeries } from '@edoxen/edoxen'
 import { useDecisions } from './useDecisions.js'
 import { useMeetings } from './useMeetings.js'
 import { useCommittee } from './useCommittee.js'

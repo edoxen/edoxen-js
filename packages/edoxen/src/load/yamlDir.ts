@@ -2,7 +2,7 @@
 // appears (verbatim) in tc154, tc184sc4, and OIML; this is the
 // canonical version.
 //
-// Future site: import { yamlDir } from 'edoxen'
+// Future site: import { yamlDir } from '@edoxen/edoxen'
 
 import fs from 'node:fs'
 

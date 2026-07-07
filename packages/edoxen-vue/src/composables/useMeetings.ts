@@ -2,7 +2,7 @@
 
 import { computed, type ComputedRef } from 'vue'
 import { createListCollection } from './createCollection.js'
-import type { Meeting } from 'edoxen'
+import type { Meeting } from '@edoxen/edoxen'
 
 export interface UseMeetingsResult {
   items: ComputedRef<Meeting[]>

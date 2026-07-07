@@ -6,8 +6,8 @@
 // parent. Built on the shared `DecisionViewModel` from edoxen.
 
 import { computed } from 'vue'
-import type { DecisionViewModel, DecisionSortOrder } from 'edoxen'
-import { compareDecisions, actionTypeLabel } from 'edoxen'
+import type { DecisionViewModel, DecisionSortOrder } from '@edoxen/edoxen'
+import { compareDecisions, actionTypeLabel } from '@edoxen/edoxen'
 import ActionTypeBadge from './ActionTypeBadge.vue'
 import PrevNextNav from './PrevNextNav.vue'
 

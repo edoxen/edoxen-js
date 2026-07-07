@@ -3,7 +3,7 @@
 import { computed, type ComputedRef } from 'vue'
 import { ref } from 'vue'
 import { createCollection } from './createCollection.js'
-import type { MeetingSeries } from 'edoxen'
+import type { MeetingSeries } from '@edoxen/edoxen'
 
 export interface UseCommitteeResult {
   committee: ComputedRef<MeetingSeries | null>

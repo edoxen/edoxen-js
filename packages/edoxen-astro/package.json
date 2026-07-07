@@ -1,6 +1,6 @@
 {
   "name": "@edoxen/astro",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Astro integration for the Edoxen data layer. Native .astro server components, SSR data loader, i18n route helpers.",
   "type": "module",
   "main": "./src/integration.ts",
@@ -9,11 +9,29 @@
     "./components": "./src/components/index.ts",
     "./package.json": "./package.json"
   },
+  "files": [
+    "src"
+  ],
   "peerDependencies": {
-    "astro": "^4 || ^5",
-    "edoxen": "workspace:*"
+    "@edoxen/edoxen": "^0.1.0",
+    "astro": "^4 || ^5"
   },
   "devDependencies": {
-    "astro": "^5.0.0"
+    "astro": "^5.0.0",
+    "@edoxen/edoxen": "workspace:*"
+  },
+  "license": "BSD-2-Clause",
+  "author": "Ribose Inc. <open.source@ribose.com>",
+  "homepage": "https://github.com/edoxen/edoxen-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edoxen/edoxen-js.git",
+    "directory": "packages/edoxen-astro"
+  },
+  "bugs": {
+    "url": "https://github.com/edoxen/edoxen-js/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

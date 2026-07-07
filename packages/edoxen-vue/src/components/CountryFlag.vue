@@ -3,7 +3,7 @@
 // or country name.
 
 import { computed } from 'vue'
-import { countryFlag } from 'edoxen'
+import { countryFlag } from '@edoxen/edoxen'
 
 const props = defineProps<{ country?: string | null }>()
 const flag = computed(() => countryFlag(props.country ?? null))
