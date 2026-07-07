@@ -1,0 +1,25 @@
+---
+// ActionTypeBadge.astro — pill showing an action verb in title-case.
+import { actionTypeLabel } from 'edoxen'
+
+export interface Props {
+  type?: string | null
+}
+
+const { type } = Astro.props
+const label = type ? actionTypeLabel(type) : ''
+---
+
+{label && <span class="edoxen-action-badge">{label}</span>}
+
+<style>
+.edoxen-action-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--edoxen-action-fg, #1f2937);
+  background: var(--edoxen-action-bg, #f3f4f6);
+  border-radius: 0.25rem;
+}
+</style>

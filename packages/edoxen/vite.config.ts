@@ -10,7 +10,13 @@ export default defineConfig({
       fileName: 'index',
     },
     rollupOptions: {
-      external: ['js-yaml', 'flexsearch', 'ajv', 'node:fs', 'node:path', 'node:url'],
+      external: [
+        'js-yaml',
+        'flexsearch',
+        'ajv',
+        '@asciidoctor/core',
+        /^node:/,
+      ],
     },
   },
   plugins: [dts({ include: ['src'], exclude: ['src/**/*.spec.ts'] })],

@@ -1,0 +1,54 @@
+---
+// ResolutionList.astro — server-rendered list of decision view-models.
+//
+// Renders at build time. No client JS by default. The component is
+// purely presentational; the consumer loads the data in frontmatter
+// and passes it in.
+
+import type { DecisionViewModel } from 'edoxen'
+import ActionTypeBadge from './ActionTypeBadge.astro'
+
+export interface Props {
+  decisions: DecisionViewModel[]
+  selectEvent?: 'click'  // informational only; .astro components don't emit
+}
+
+const { decisions } = Astro.props
+---
+
+<ul class="edoxen-resolution-list" role="list">
+  {decisions.map((d) => (
+    <li class="edoxen-resolution-list__item">
+      <div class="edoxen-resolution-list__meta">
+        <span class="edoxen-resolution-list__year">{d.year}</span>
+        <span class="edoxen-resolution-list__id">{d.identifier}</span>
+      </div>
+      <h3 class="edoxen-resolution-list__title">
+        <a href={`/resolution/${d.id}/`}>{d.title || d.snippet || d.actions[0]?.type}</a>
+      </h3>
+      {d.snippet && <p class="edoxen-resolution-list__snippet">{d.snippet}</p>}
+      {d.actions.length > 0 && (
+        <div class="edoxen-resolution-list__actions">
+          {d.actions.slice(0, 3).map((a) => (
+            <ActionTypeBadge type={a.type} />
+          ))}
+        </div>
+      )}
+    </li>
+  ))}
+</ul>
+
+<style>
+.edoxen-resolution-list { list-style: none; padding: 0; margin: 0; }
+.edoxen-resolution-list__item {
+  padding: 1rem;
+  border-bottom: 1px solid var(--edoxen-border, #e5e7eb);
+}
+.edoxen-resolution-list__meta { display: flex; gap: 1rem; font-size: 0.875rem; color: #6b7280; }
+.edoxen-resolution-list__year { font-weight: 600; }
+.edoxen-resolution-list__title { margin: 0.5rem 0 0.25rem; font-size: 1.05rem; }
+.edoxen-resolution-list__title a { color: inherit; text-decoration: none; }
+.edoxen-resolution-list__title a:hover { text-decoration: underline; }
+.edoxen-resolution-list__snippet { margin: 0; color: #4b5563; font-size: 0.9rem; line-height: 1.4; }
+.edoxen-resolution-list__actions { display: flex; gap: 0.25rem; margin-top: 0.5rem; flex-wrap: wrap; }
+</style>

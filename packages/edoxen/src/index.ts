@@ -112,3 +112,13 @@ export * from './i18n/index.js'
 export * from './body/index.js'
 export * from './validate/index.js'
 export * from './config/index.js'
+export * from './domain/index.js'
+
+export { asciidocify } from './utils/asciidoc.js'
+export {
+  highlightText,
+  registerHighlightBackend,
+  type HighlightBackend,
+} from './utils/highlight.js'
+export { countryFlag, flagFromVenue } from './data/countryFlags.js'
+export { actionTypeLabel, ACTION_TYPE_LABELS } from './data/actionTypes.js'
