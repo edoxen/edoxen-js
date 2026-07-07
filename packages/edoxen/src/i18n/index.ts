@@ -5,7 +5,25 @@
 // array with one entry per available language. This module picks the
 // right entry per consumer locale.
 
-export interface Localized<T> {
+// Locale — branded ISO 639 code (3-letter ISO 639-3 or 2-letter
+// ISO 639-1). Branded to prevent passing arbitrary strings where a
+// locale is expected.
+const LOCALE_RE = /^[a-z]{2,3}$/
+
+export type Locale = string & { readonly __brand: 'Locale' }
+
+export function isLocale(value: unknown): value is Locale {
+  return typeof value === 'string' && LOCALE_RE.test(value)
+}
+
+export function buildLocale(value: string): Locale {
+  if (!LOCALE_RE.test(value)) {
+    throw new Error(`Invalid locale: ${value}`)
+  }
+  return value as Locale
+}
+
+export interface Localized<T = unknown> {
   language_code: string
   script?: string
   [key: string]: unknown
@@ -14,13 +32,13 @@ export interface Localized<T> {
 
 export function pickLocalization<T extends { language_code: string }>(
   list: T[] | null | undefined,
-  preferred: string,
+  preferred: Locale | string,
   fallback = true,
 ): T | null {
   if (!Array.isArray(list) || list.length === 0) return null
   const match = list.find((l) => l.language_code === preferred)
   if (match) return match
-  return fallback ? list[0] ?? null : null
+  return fallback ? (list[0] ?? null) : null
 }
 
 // ISO 639-3 → ISO 639-1 (best-effort). Falls back to the input.
@@ -37,7 +55,7 @@ export function iso6393To6391(code: string): string {
 
 export function formatDate(
   date: string | Date | null | undefined,
-  locale: string,
+  locale: Locale | string,
   opts: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' },
 ): string {
   if (!date) return ''

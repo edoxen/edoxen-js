@@ -18,6 +18,15 @@ export function buildUrn(value: string): Urn {
   return value as Urn
 }
 
+// DecisionId — opaque identifier string derived from a Decision's
+// structured identifier (e.g. "CIML/2009-1" → "CIML-2009-1").
+// Branded to prevent passing arbitrary strings.
+export type DecisionId = string & { readonly __brand: 'DecisionId' }
+
+export function buildDecisionId(value: string): DecisionId {
+  return value.replace(/\//g, '-') as DecisionId
+}
+
 export function parseUrn(value: string): { nid: string; nss: string } | null {
   const m = value.match(/^urn:([a-z0-9][a-z0-9-]{0,30}):(.+)$/)
   if (!m) return null

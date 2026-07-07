@@ -7,66 +7,80 @@
 // `pathOrDir` may be a single file or a directory. Directory loads
 // return every `*.ya?ml` file concatenated; single-file loads return
 // the parsed document.
+//
+// The returned types come straight from the generated types — no
+// `unknown` here. Callers can rely on shape.
 
 import fs from 'node:fs'
 import path from 'node:path'
 import { load as yamlLoad } from 'js-yaml'
 
 import { yamlDir } from './yamlDir.js'
+import { normalizeDates } from './normalizeDates.js'
+import type {
+  Decision,
+  DecisionMetadata,
+} from '../types/generated/edoxen.js'
+import type {
+  Meeting,
+  MeetingCollection,
+  MeetingCollectionMetadata,
+  MeetingSeries,
+} from '../types/generated/meeting.js'
 
 export interface LoadedDecisions {
-  metadata: unknown
-  decisions: unknown[]
+  metadata: DecisionMetadata | Record<string, never>
+  decisions: Decision[]
 }
 
 export interface LoadedMeetings {
-  metadata?: unknown
-  meetings: unknown[]
-  series?: unknown[]
+  metadata?: MeetingCollectionMetadata
+  meetings: Meeting[]
+  series?: MeetingSeries[]
 }
 
-const YAML_RE = /\.ya?ml$/i
-
-function readYaml(file: string): unknown {
-  return yamlLoad(fs.readFileSync(file, 'utf8'))
+interface DocumentLike {
+  [key: string]: unknown
 }
 
-function hasKind<T extends string>(obj: unknown, key: T): obj is Record<T, unknown> {
-  return typeof obj === 'object' && obj !== null && key in obj
+function isObject(value: unknown): value is DocumentLike {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
 function fromSingleDecisionDoc(parsed: unknown): LoadedDecisions {
-  if (!parsed || typeof parsed !== 'object') return { metadata: {}, decisions: [] }
-  const doc = parsed as Record<string, unknown>
-  const metadata = doc.metadata ?? {}
-  const decisions = Array.isArray(doc.decisions) ? doc.decisions : []
-  return { metadata, decisions }
+  if (!isObject(parsed)) return { metadata: {}, decisions: [] }
+  return {
+    metadata: (isObject(parsed.metadata) ? parsed.metadata : {}) as DecisionMetadata,
+    decisions: Array.isArray(parsed.decisions) ? (parsed.decisions as Decision[]) : [],
+  }
 }
 
 function fromSingleMeetingDoc(parsed: unknown): LoadedMeetings {
-  if (!parsed || typeof parsed !== 'object') return { meetings: [] }
-  const doc = parsed as Record<string, unknown>
+  if (!isObject(parsed)) return { meetings: [] }
 
-  if (Array.isArray(doc.meetings)) {
-    return { metadata: doc.metadata ?? {}, meetings: doc.meetings }
+  if (Array.isArray(parsed.meetings)) {
+    return {
+      metadata: isObject(parsed.metadata)
+        ? (parsed.metadata as MeetingCollectionMetadata)
+        : undefined,
+      meetings: parsed.meetings as Meeting[],
+    }
   }
-  if (hasKind(doc, 'meeting_refs')) {
-    return { series: [doc], meetings: [] }
+  if ('meeting_refs' in parsed || ('identifier' in parsed && !('type' in parsed) && !('date_range' in parsed))) {
+    return { series: [parsed as unknown as MeetingSeries], meetings: [] }
   }
-  return { meetings: [doc] }
+  return { meetings: [parsed as unknown as Meeting] }
 }
 
 export async function loadDecisions(target: string): Promise<LoadedDecisions> {
   const stat = fs.statSync(target)
   if (stat.isDirectory()) {
-    const all: unknown[] = []
-    let metadata: unknown = {}
+    const all: Decision[] = []
+    let metadata: DecisionMetadata | Record<string, never> = {}
     for (const file of yamlDir(target)) {
-      const parsed = readYaml(path.join(target, file))
-      if (!parsed || typeof parsed !== 'object') continue
-      const sub = fromSingleDecisionDoc(parsed)
+      const sub = fromSingleDecisionDoc(readYaml(path.join(target, file)))
       all.push(...sub.decisions)
-      if (metadata && typeof metadata === 'object' && Object.keys(metadata as object).length === 0) {
+      if (!metadata || (isObject(metadata) && Object.keys(metadata).length === 0)) {
         metadata = sub.metadata
       }
     }
@@ -78,12 +92,10 @@ export async function loadDecisions(target: string): Promise<LoadedDecisions> {
 export async function loadMeetings(target: string): Promise<LoadedMeetings> {
   const stat = fs.statSync(target)
   if (stat.isDirectory()) {
-    const allMeetings: unknown[] = []
-    const allSeries: unknown[] = []
+    const allMeetings: Meeting[] = []
+    const allSeries: MeetingSeries[] = []
     for (const file of yamlDir(target)) {
-      const parsed = readYaml(path.join(target, file))
-      if (!parsed || typeof parsed !== 'object') continue
-      const sub = fromSingleMeetingDoc(parsed)
+      const sub = fromSingleMeetingDoc(readYaml(path.join(target, file)))
       allMeetings.push(...sub.meetings)
       if (sub.series) allSeries.push(...sub.series)
     }
@@ -92,15 +104,19 @@ export async function loadMeetings(target: string): Promise<LoadedMeetings> {
   return fromSingleMeetingDoc(readYaml(target))
 }
 
-export async function loadMeetingSeries(file: string): Promise<unknown> {
+export async function loadMeetingSeries(file: string): Promise<MeetingSeries | null> {
   const parsed = readYaml(file)
-  if (!parsed || typeof parsed !== 'object') return null
-  const doc = parsed as Record<string, unknown>
-  return doc.meeting_refs ? doc : null
+  if (!isObject(parsed)) return null
+  return 'meeting_refs' in parsed ? (parsed as unknown as MeetingSeries) : null
 }
 
 export async function loadCollection(file: string): Promise<LoadedDecisions> {
   return fromSingleDecisionDoc(readYaml(file))
 }
 
-export { yamlDir, YAML_RE }
+function readYaml(file: string): unknown {
+  return normalizeDates(yamlLoad(fs.readFileSync(file, 'utf8')))
+}
+
+export { yamlDir }
+export type { MeetingCollection }

@@ -4,32 +4,39 @@
 // registered via `registerBackend()`. Consumers that bring their own
 // search pass `backend: 'none'` and ignore this module entirely.
 
-export interface SearchIndex<T> {
+export interface SearchDoc {
+  readonly [key: string]: unknown
+}
+
+export interface SearchIndex<T extends SearchDoc> {
   search(query: string): T[]
 }
 
 export type SearchBackend = 'flexsearch' | 'none'
 
-export interface IndexOptions {
+export interface IndexOptions<T extends SearchDoc> {
   backend?: SearchBackend
-  fields: string[]
-  idField: string
+  fields: Array<keyof T & string>
+  idField: keyof T & string
 }
 
-export async function buildSearchIndex<T extends Record<string, unknown>>(
+export async function buildSearchIndex<T extends SearchDoc>(
   docs: T[],
-  opts: IndexOptions,
+  opts: IndexOptions<T>,
 ): Promise<SearchIndex<T>> {
   const backend = opts.backend ?? 'flexsearch'
   if (backend === 'none') {
     return new LinearScanIndex(docs, opts)
   }
-  const { FlexSearchBackend } = await import('./flexsearch.js')
-  return new FlexSearchBackend(docs, opts)
+  const { createFlexSearchBackend } = await import('./flexsearch.js')
+  return createFlexSearchBackend(docs, opts)
 }
 
-class LinearScanIndex<T extends Record<string, unknown>> implements SearchIndex<T> {
-  constructor(private readonly docs: T[], private readonly opts: IndexOptions) {}
+class LinearScanIndex<T extends SearchDoc> implements SearchIndex<T> {
+  constructor(
+    private readonly docs: T[],
+    private readonly opts: IndexOptions<T>,
+  ) {}
   search(query: string): T[] {
     if (!query) return this.docs
     const q = query.toLowerCase()

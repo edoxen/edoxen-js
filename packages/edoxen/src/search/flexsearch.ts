@@ -1,47 +1,58 @@
 // FlexSearch backend — the default SearchIndex implementation.
-// The FlexSearch peer dep is loaded lazily so consumers that pass
-// `backend: 'none'` (or use a different backend) don't bundle it.
+// Created via `createFlexSearchBackend()` (async) since FlexSearch
+// loads via dynamic ESM import. Avoids the globalThis hack.
+//
+// The FlexSearch peer dep is only loaded when this backend is
+// actually selected; consumers using `backend: 'none'` (or a
+// different backend) never pull it into their bundle.
 
-import type { SearchIndex, IndexOptions } from './index.js'
+import type { SearchDoc, SearchIndex, IndexOptions } from './index.js'
 
-// FlexSearch ships its own .d.ts; load dynamically so this file is
-// tree-shakeable when unused.
-type FlexSearchDocument = {
+interface FlexSearchDocument {
   add: (doc: Record<string, unknown>) => void
-  search: (query: string) => Array<{ doc?: Record<string, unknown> } | number>
+  search: (query: string) => Array<Array<{ doc?: Record<string, unknown> } | number>>
 }
 
-export class FlexSearchBackend<T extends Record<string, unknown>> implements SearchIndex<T> {
-  private readonly idx: FlexSearchDocument
-  private readonly docs: T[]
-  private readonly idField: string
+interface FlexSearchModule {
+  Document: new (opts: unknown) => FlexSearchDocument
+}
 
-  constructor(docs: T[], opts: IndexOptions) {
-    this.docs = docs
-    this.idField = opts.idField
-    // Lazy-require via dynamic import so the FlexSearch peer dep
-    // isn't pulled into bundles that never build an index.
-    //
-    // The constructor is sync by API contract; FlexSearch is a CJS
-    // module that's already loaded by the time we get here in any
-    // realistic call path.
-    //
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const FlexSearch = (globalThis as { FlexSearch?: { Document: new (opts: unknown) => FlexSearchDocument } }).FlexSearch
-    if (!FlexSearch) {
-      throw new Error("FlexSearch peer dep not available. Install 'flexsearch' or pass backend: 'none'.")
-    }
-    this.idx = new FlexSearch.Document({
-      document: { id: opts.idField, index: opts.fields },
-      tokenize: 'forward',
+let cachedModule: Promise<FlexSearchModule> | null = null
+
+async function loadFlexSearch(): Promise<FlexSearchModule> {
+  if (!cachedModule) {
+    cachedModule = import('flexsearch').then((m) => {
+      // flexsearch's ESM shape: { Document, ... } or { default: { Document, ... } }
+      const mod = m as unknown as FlexSearchModule & { default?: FlexSearchModule }
+      return (mod.Document ? mod : mod.default ?? mod) as FlexSearchModule
     })
-    for (const doc of docs) this.idx.add(doc)
   }
+  return cachedModule
+}
 
-  search(query: string): T[] {
-    if (!query) return this.docs
-    const hits = this.idx.search(query)
-    const ids = new Set(hits.flat().map((h) => (typeof h === 'number' ? h : (h.doc?.[this.idField] as number))))
-    return this.docs.filter((d) => ids.has(d[this.idField] as number))
+export async function createFlexSearchBackend<T extends SearchDoc>(
+  docs: T[],
+  opts: IndexOptions<T>,
+): Promise<SearchIndex<T>> {
+  const mod = await loadFlexSearch()
+  const idx = new mod.Document({
+    document: { id: opts.idField, index: opts.fields },
+    tokenize: 'forward',
+  })
+  for (const doc of docs) idx.add(doc as Record<string, unknown>)
+
+  return {
+    search(query: string): T[] {
+      if (!query) return docs
+      const hits = idx.search(query)
+      const ids = new Set<unknown>()
+      for (const group of hits) {
+        for (const h of group) {
+          if (typeof h === 'number') ids.add(h)
+          else if (h.doc) ids.add(h.doc[opts.idField])
+        }
+      }
+      return docs.filter((d) => ids.has(d[opts.idField]))
+    },
   }
 }

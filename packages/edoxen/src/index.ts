@@ -33,6 +33,19 @@ export type {
   UrlKind,
 } from './types/generated/edoxen.js'
 
+// VoteRecord, Motion, Voting, VotingCounts, PhysicalVenue,
+// VirtualVenue are defined in the decision-collection schema (not
+// meeting.json) and surface in the generated output only when
+// `unreachableDefinitions: true` is passed to json-schema-to-typescript.
+export type {
+  Motion,
+  Voting,
+  VotingCounts,
+  VoteRecord,
+  PhysicalVenue,
+  VirtualVenue,
+} from './types/generated/edoxen.js'
+
 // Meeting-side + shared types (live in meeting.json — the superset):
 export type {
   MeetingCollection,
@@ -98,3 +111,4 @@ export * from './urn/index.js'
 export * from './i18n/index.js'
 export * from './body/index.js'
 export * from './validate/index.js'
+export * from './config/index.js'

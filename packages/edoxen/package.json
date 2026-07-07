@@ -35,8 +35,12 @@
     "js-yaml": "^4.1.0"
   },
   "peerDependenciesMeta": {
-    "ajv": { "optional": true },
-    "flexsearch": { "optional": true }
+    "ajv": {
+      "optional": true
+    },
+    "flexsearch": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
@@ -50,5 +54,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "esbuild": "^0.28.1"
   }
 }

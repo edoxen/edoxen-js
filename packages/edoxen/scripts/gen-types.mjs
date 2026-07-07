@@ -35,6 +35,7 @@ for (const { schema, out } of SOURCES) {
     bannerComment: '// AUTO-GENERATED from src/schema/*.json. Do not edit by hand.',
     style: { singleQuote: true, semi: false },
     additionalProperties: false,
+    unreachableDefinitions: true,
   })
   fs.writeFileSync(outPath, compiled)
   console.log(`generated ${path.relative(process.cwd(), outPath)}`)
