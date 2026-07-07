@@ -11,6 +11,8 @@ import { compareDecisions, actionTypeLabel } from 'edoxen'
 import ActionTypeBadge from './ActionTypeBadge.vue'
 import PrevNextNav from './PrevNextNav.vue'
 
+interface ActionLike { type?: string }
+
 const props = defineProps<{
   decisions: DecisionViewModel[]
   selectedYears?: string[]
@@ -31,7 +33,7 @@ const filtered = computed(() => {
   if (props.selectedActionTypes?.length) {
     const wanted = new Set(props.selectedActionTypes)
     out = out.filter((d) =>
-      d.actions.some((a) => wanted.has((a as { type?: string }).type ?? '')),
+      d.actions.some((a: unknown) => wanted.has((a as ActionLike).type ?? '')),
     )
   }
   if (props.query) {
@@ -45,6 +47,12 @@ const filtered = computed(() => {
   }
   return [...out].sort(compareDecisions(props.sort ?? 'newest'))
 })
+
+// Pre-cast actions for template consumption; TS assertions don't
+// work directly inside Vue template expressions.
+function actionType(action: unknown): string {
+  return (action as ActionLike).type ?? ''
+}
 </script>
 
 <template>
@@ -59,13 +67,13 @@ const filtered = computed(() => {
         <span class="edoxen-resolution-list__year">{{ d.year }}</span>
         <span class="edoxen-resolution-list__id">{{ d.identifier }}</span>
       </div>
-      <h3 class="edoxen-resolution-list__title">{{ d.title || d.snippet || actionTypeLabel(d.actions[0]?.type) }}</h3>
+      <h3 class="edoxen-resolution-list__title">{{ d.title || d.snippet || actionTypeLabel(actionType(d.actions[0])) }}</h3>
       <p v-if="d.snippet" class="edoxen-resolution-list__snippet">{{ d.snippet }}</p>
       <div v-if="d.actions.length" class="edoxen-resolution-list__actions">
         <ActionTypeBadge
           v-for="a in d.actions.slice(0, 3)"
-          :key="(a as { type?: string }).type"
-          :type="(a as { type?: string }).type"
+          :key="actionType(a)"
+          :type="actionType(a)"
         />
       </div>
     </li>

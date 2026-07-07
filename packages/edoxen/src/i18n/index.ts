@@ -55,7 +55,7 @@ export function iso6393To6391(code: string): string {
 
 export function formatDate(
   date: string | Date | null | undefined,
-  locale: Locale | string,
+  locale: Locale | string = 'en',
   opts: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' },
 ): string {
   if (!date) return ''

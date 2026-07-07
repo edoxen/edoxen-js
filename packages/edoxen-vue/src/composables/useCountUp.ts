@@ -1,6 +1,8 @@
 // useCountUp — animate a number from 0 to target when `active`
 // becomes true. Lifted character-for-character from tc184sc4 and
 // OIML's identical copies.
+//
+// Returns Ref<number> (never null) for ergonomic template use.
 
 import { ref, watch, type Ref } from 'vue'
 
@@ -8,8 +10,8 @@ export function useCountUp(
   target: Ref<number | null>,
   active: Ref<boolean>,
   duration = 1500,
-): Ref<number | null> {
-  const current = ref<number | null>(0)
+): Ref<number> {
+  const current = ref(0)
   let started = false
 
   watch(

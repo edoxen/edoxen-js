@@ -124,6 +124,8 @@ export {
   countryFlag,
   flagFromVenue,
   countryCodeFromVenue,
+  venueToFlag,
+  venueToCountryCode,
 } from './data/countryFlags.js'
 export {
   actionTypeLabel,

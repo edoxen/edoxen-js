@@ -61,3 +61,7 @@ export function countryCodeFromVenue(venue: string | null | undefined): string {
   if (/^[a-z]{2}$/.test(country)) return country.toUpperCase()
   return COUNTRY_NAME_TO_CODE[country] ?? ''
 }
+
+// Aliases matching tc184sc4's naming — kept for migration ergonomics.
+export const venueToFlag = flagFromVenue
+export const venueToCountryCode = countryCodeFromVenue

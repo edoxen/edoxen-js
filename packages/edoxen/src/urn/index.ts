@@ -42,3 +42,10 @@ export function urnPath(urn: string, prefix?: string): string {
   const slug = slugFromUrn(urn)
   return prefix ? `${prefix.replace(/\/$/, '')}/${slug}` : slug
 }
+
+// Build a meeting URN from a nid (e.g. 'oiml') and an identifier
+// slug (e.g. 'ciml-15'). Convenience used by sites that construct
+// URNs from committee + slug.
+export function buildMeetingUrn(nid: string, slug: string): Urn {
+  return buildUrn(`urn:${nid}:meeting:${slug}`)
+}
