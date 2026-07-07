@@ -1,0 +1,35 @@
+{
+  "name": "edoxen-js",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Monorepo for edoxen JS packages: data layer, Astro components, Vue adapter.",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "docs",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r --filter='./packages/*' build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "gen:types": "pnpm -F edoxen gen:types",
+    "sync:schema": "pnpm -F edoxen sync:schema",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "dependencies": {
+    "@types/node": "^26.1.0"
+  }
+}

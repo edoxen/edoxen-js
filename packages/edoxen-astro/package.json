@@ -1,0 +1,19 @@
+{
+  "name": "@edoxen/astro",
+  "version": "0.0.0",
+  "description": "Astro integration for the Edoxen data layer. Native .astro server components, SSR data loader, i18n route helpers.",
+  "type": "module",
+  "main": "./src/integration.ts",
+  "exports": {
+    ".": "./src/integration.ts",
+    "./components": "./src/components/index.ts",
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "astro": "^4 || ^5",
+    "edoxen": "workspace:*"
+  },
+  "devDependencies": {
+    "astro": "^5.0.0"
+  }
+}
