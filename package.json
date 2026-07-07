@@ -15,6 +15,10 @@
     "lint": "pnpm -r lint",
     "gen:types": "pnpm -F edoxen gen:types",
     "sync:schema": "pnpm -F edoxen sync:schema",
+    "check:budget": "pnpm -F edoxen build && node scripts/check-bundle-budget.mjs",
+    "check:schema-sync": "node scripts/check-schema-sync.mjs",
+    "check:pack": "pnpm -r --filter='./packages/*' build && node scripts/check-pack.mjs",
+    "check:all": "pnpm check:schema-sync && pnpm check:budget && pnpm check:pack && pnpm -r test",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "pnpm build && changeset publish"

@@ -25,3 +25,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r --filter='./packages/*' build
       - run: pnpm -r test
+      - name: Schema sync drift check
+        run: pnpm check:schema-sync
+      - name: Bundle size budget
+        run: pnpm check:budget
+      - name: npm pack smoke
+        run: pnpm check:pack
