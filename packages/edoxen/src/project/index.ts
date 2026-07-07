@@ -15,7 +15,10 @@ export interface EdoxenProject {
 
   decisionsByMeeting(): ReadonlyMap<string, readonly Decision[]>
   decisionsByYear(): ReadonlyMap<string, readonly Decision[]>
+  decisionsByKind(): ReadonlyMap<string, readonly Decision[]>
   meetingByUrn(urn: Urn | string): Meeting | undefined
+  meetingByYear(year: number): readonly Meeting[]
+  decisionByUrn(urn: Urn | string): Decision | undefined
   decisionsForMeeting(urn: Urn | string): readonly Decision[]
 }
 
@@ -39,6 +42,18 @@ function yearOfDecision(d: Decision): string {
   return ''
 }
 
+function kindOfDecision(d: Decision): string {
+  return d.kind ?? ''
+}
+
+function yearOfMeeting(m: Meeting): number | null {
+  const dr = m.date_range as { start?: string } | undefined
+  const s = dr?.start
+  if (typeof s !== 'string' || !s) return null
+  const y = parseInt(s.slice(0, 4), 10)
+  return Number.isNaN(y) ? null : y
+}
+
 export function buildProject(opts: BuildProjectOpts = {}): EdoxenProject {
   const decisions = opts.decisions ?? []
   const meetings = opts.meetings ?? []
@@ -46,7 +61,10 @@ export function buildProject(opts: BuildProjectOpts = {}): EdoxenProject {
 
   let byMeeting: ReadonlyMap<string, readonly Decision[]> | null = null
   let byYear: ReadonlyMap<string, readonly Decision[]> | null = null
+  let byKind: ReadonlyMap<string, readonly Decision[]> | null = null
   let meetingByUrnMap: ReadonlyMap<string, Meeting> | null = null
+  let meetingByYearMap: ReadonlyMap<number, Meeting[]> | null = null
+  let decisionByUrnMap: ReadonlyMap<string, Decision> | null = null
 
   function ensureByMeeting(): ReadonlyMap<string, readonly Decision[]> {
     if (byMeeting) return byMeeting
@@ -76,6 +94,20 @@ export function buildProject(opts: BuildProjectOpts = {}): EdoxenProject {
     return m
   }
 
+  function ensureByKind(): ReadonlyMap<string, readonly Decision[]> {
+    if (byKind) return byKind
+    const m = new Map<string, Decision[]>()
+    for (const d of decisions) {
+      const key = kindOfDecision(d)
+      if (!key) continue
+      const list = m.get(key)
+      if (list) list.push(d)
+      else m.set(key, [d])
+    }
+    byKind = m
+    return m
+  }
+
   function ensureMeetingByUrn(): ReadonlyMap<string, Meeting> {
     if (meetingByUrnMap) return meetingByUrnMap
     const m = new Map<string, Meeting>()
@@ -87,6 +119,31 @@ export function buildProject(opts: BuildProjectOpts = {}): EdoxenProject {
     return m
   }
 
+  function ensureMeetingByYear(): ReadonlyMap<number, Meeting[]> {
+    if (meetingByYearMap) return meetingByYearMap
+    const m = new Map<number, Meeting[]>()
+    for (const meeting of meetings) {
+      const y = yearOfMeeting(meeting)
+      if (y == null) continue
+      const list = m.get(y)
+      if (list) list.push(meeting)
+      else m.set(y, [meeting])
+    }
+    meetingByYearMap = m
+    return m
+  }
+
+  function ensureDecisionByUrn(): ReadonlyMap<string, Decision> {
+    if (decisionByUrnMap) return decisionByUrnMap
+    const m = new Map<string, Decision>()
+    for (const d of decisions) {
+      const urn = d.urn
+      if (urn) m.set(urn, d)
+    }
+    decisionByUrnMap = m
+    return m
+  }
+
   return {
     committee,
     decisions,
@@ -94,9 +151,10 @@ export function buildProject(opts: BuildProjectOpts = {}): EdoxenProject {
 
     decisionsByMeeting: () => ensureByMeeting(),
     decisionsByYear: () => ensureByYear(),
-
+    decisionsByKind: () => ensureByKind(),
     meetingByUrn: (urn) => ensureMeetingByUrn().get(urn),
-
+    meetingByYear: (year) => ensureMeetingByYear().get(year) ?? [],
+    decisionByUrn: (urn) => ensureDecisionByUrn().get(urn),
     decisionsForMeeting: (urn) => ensureByMeeting().get(urn) ?? [],
   }
 }

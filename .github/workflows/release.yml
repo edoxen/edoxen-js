@@ -1,0 +1,44 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: 'Which packages to publish (all | edoxen | @edoxen/vue)'
+        required: false
+        default: 'all'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r --filter='./packages/*' build
+      - run: pnpm -r test
+      - name: Publish edoxen
+        if: inputs.packages == 'all' || inputs.packages == 'edoxen'
+        run: pnpm -F edoxen publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish @edoxen/vue
+        if: inputs.packages == 'all' || inputs.packages == '@edoxen/vue'
+        run: pnpm -F @edoxen/vue publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

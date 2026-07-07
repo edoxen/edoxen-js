@@ -1,6 +1,6 @@
 {
   "name": "edoxen",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Framework-agnostic TypeScript data layer for the Edoxen meeting/decision information model. JSON-Schema-driven types, YAML loaders, transforms, search, URN, i18n, and validate helpers.",
   "type": "module",
   "main": "./dist/index.js",
@@ -54,6 +54,21 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "license": "BSD-2-Clause",
+  "author": "Ribose Inc. <open.source@ribose.com>",
+  "homepage": "https://github.com/edoxen/edoxen-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edoxen/edoxen-js.git",
+    "directory": "packages/edoxen"
+  },
+  "bugs": {
+    "url": "https://github.com/edoxen/edoxen-js/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "dependencies": {
     "@asciidoctor/core": "^4.0.2",
