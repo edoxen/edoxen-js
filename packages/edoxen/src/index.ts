@@ -120,5 +120,13 @@ export {
   registerHighlightBackend,
   type HighlightBackend,
 } from './utils/highlight.js'
-export { countryFlag, flagFromVenue } from './data/countryFlags.js'
-export { actionTypeLabel, ACTION_TYPE_LABELS } from './data/actionTypes.js'
+export {
+  countryFlag,
+  flagFromVenue,
+  countryCodeFromVenue,
+} from './data/countryFlags.js'
+export {
+  actionTypeLabel,
+  actionTypeColor,
+  ACTION_TYPE_LABELS,
+} from './data/actionTypes.js'

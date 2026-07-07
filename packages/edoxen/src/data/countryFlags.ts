@@ -52,3 +52,12 @@ export function flagFromVenue(venue: string | null | undefined): string {
   const parts = venue.split(',')
   return countryFlag(parts[parts.length - 1])
 }
+
+// "City, Country" → ISO 3166-1 alpha-2 code for the country segment.
+export function countryCodeFromVenue(venue: string | null | undefined): string {
+  if (!venue) return ''
+  const parts = venue.split(',')
+  const country = parts[parts.length - 1].trim().toLowerCase()
+  if (/^[a-z]{2}$/.test(country)) return country.toUpperCase()
+  return COUNTRY_NAME_TO_CODE[country] ?? ''
+}

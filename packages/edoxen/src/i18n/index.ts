@@ -65,3 +65,11 @@ export function formatDate(
   const tag = locale.length === 3 ? iso6393To6391(locale) : locale
   return new Intl.DateTimeFormat(tag, opts).format(d)
 }
+
+// Compact date for timeline rows: "Oct 18".
+export function formatDateShort(
+  date: string | Date | null | undefined,
+  locale: Locale | string = 'en',
+): string {
+  return formatDate(date, locale, { month: 'short', day: 'numeric' })
+}
