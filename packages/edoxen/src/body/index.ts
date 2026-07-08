@@ -54,3 +54,32 @@ export function bodyTypeFromUrn(
   }
   return null
 }
+
+// bodyTypeFromSourceFile — derive the body code from a fixture
+// filename. Common OIML convention: 'conference-17-resolutions.yaml'
+// → 'conference'; 'ciml-15-resolutions.yaml' → 'ciml'.
+export function bodyTypeFromSourceFile(
+  sourceFile: string | null | undefined,
+  scope: string,
+): BodyCode | null {
+  if (!sourceFile) return null
+  const lower = sourceFile.toLowerCase()
+  for (const t of getBodyTypes(scope)) {
+    if (lower.startsWith(t.code + '-') || lower.startsWith(t.code + '_')) {
+      return t.code
+    }
+  }
+  return null
+}
+
+// buildDoi — mint a DOI under a given prefix. OIML convention:
+// 10.63493/meetings/ciml15 — meetings; 10.63493/resolutions/ciml20091
+// for resolutions. The prefix slug (e.g. 'ciml', 'conf') is supplied
+// by the caller because it's body-convention-specific.
+export function buildDoi(
+  prefix: string,
+  category: string,
+  slug: string,
+): string {
+  return `${prefix}/${category}/${slug}`
+}

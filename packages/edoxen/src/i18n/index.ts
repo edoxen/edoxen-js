@@ -73,3 +73,5 @@ export function formatDateShort(
 ): string {
   return formatDate(date, locale, { month: 'short', day: 'numeric' })
 }
+
+export { defineI18n, interpolate, detectLocale, type I18nConfig, type I18nInstance } from './define.js'
