@@ -7,7 +7,7 @@ import {
 } from '../src/transforms/index.js'
 import { displayName, primaryContactMethod } from '../src/contacts/index.js'
 import { isUrn, buildUrn, parseUrn, slugFromUrn } from '../src/urn/index.js'
-import { pickLocalization, iso6393To6391, formatDate } from '../src/i18n/index.js'
+import { pickLocalized, pickLocalizedValue, iso6393To6391, formatDate } from '../src/i18n/index.js'
 import { yamlDir } from '../src/load/yamlDir.js'
 
 describe('transforms', () => {
@@ -91,11 +91,11 @@ describe('urn', () => {
 })
 
 describe('i18n', () => {
-  it('picks the preferred localization with fallback', () => {
-    const list = [{ language_code: 'fra', title: 'Bonjour' }, { language_code: 'eng', title: 'Hello' }]
-    expect(pickLocalization(list, 'eng')?.title).toBe('Hello')
-    expect(pickLocalization(list, 'deu')?.title).toBe('Bonjour')
-    expect(pickLocalization(list, 'deu', false)).toBeNull()
+  it('picks the preferred per-field Localized entry with fallback', () => {
+    const list = [{ spelling: 'fra', value: 'Bonjour' }, { spelling: 'eng', value: 'Hello' }]
+    expect(pickLocalizedValue(list, 'eng')).toBe('Hello')
+    expect(pickLocalizedValue(list, 'deu')).toBe('Bonjour')
+    expect(pickLocalized(list, 'deu', false)).toBeNull()
   })
 
   it('maps ISO 639-3 to 639-1', () => {

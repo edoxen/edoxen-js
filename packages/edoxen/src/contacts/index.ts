@@ -1,13 +1,12 @@
-// Contacts — v2.2 Contact / Name / ContactMethod helpers.
+// Contacts — v3.0 Contact / Name / ContactMethod helpers.
 //
-// v2.2 (per TODO.refactor in the gem) collapsed the v2.1 flat
-// `email`/`phone`/`orcid` fields on Person into typed
-// `contact_methods[]` (kind-discriminated) and `identifiers[]`. The
-// `name` field is now a Name object (VCARD-shaped), not a string.
-//
-// No back-compat — fixtures must conform to the v2.2 wire shape.
+// v3.0 per-field localization: every translatable field on Contact
+// is `Localized<String|Name>[]`. The `name` field is an array of
+// `{ spelling, value: Name }` entries (per ISO 24229 spelling codes).
+// Use `displayName()` to pick a localized Name and render it.
 
-import type { Name, Contact, ContactMethod, MeetingExtension, ExtensionAttribute } from '../types/generated/meeting.js'
+import type { Name, Contact, ContactMethod, MeetingExtension, ExtensionAttribute, LocalizedName, LocalizedString } from '../types/generated/meeting.js'
+import { pickLocalized } from '../i18n/index.js'
 
 export interface ResolvedContact {
   name: string
@@ -24,6 +23,29 @@ export function displayName(name: Name | null | undefined): string {
     .join(' ')
 }
 
+// Pick a localized name from a v3.0 LocalizedName[] collection.
+// Returns the matching Name (or first, when fallback). Returns null
+// when the collection is empty.
+export function pickName(
+  names: LocalizedName[] | null | undefined,
+  preferred: string,
+  fallback = true,
+): Name | null {
+  const entry = pickLocalized(names as { spelling: string; value: Name }[] | null | undefined, preferred, fallback)
+  return entry?.value ?? null
+}
+
+// Pick the first localized string value out of a v3.0 LocalizedString[]
+// collection. Used for title, affiliation, address, etc.
+export function pickString(
+  list: LocalizedString[] | null | undefined,
+  preferred: string,
+  fallback = true,
+): string {
+  const entry = pickLocalized(list as { spelling: string; value: string }[] | null | undefined, preferred, fallback)
+  return entry?.value ?? ''
+}
+
 export function primaryContactMethod(
   methods: ContactMethod[] | null | undefined,
   kind: string,
@@ -34,22 +56,26 @@ export function primaryContactMethod(
   return primary?.value ?? ''
 }
 
-export function presentContact(p: Contact | null | undefined): ResolvedContact | null {
+// Resolve a Contact to a display-friendly shape for a preferred spelling.
+// Picks the localized name, affiliation, email, phone. Returns null when
+// the Contact itself is null or is a `{ ref: ... }` URN reference.
+export function presentContact(
+  p: Contact | null | undefined,
+  preferredSpelling = 'eng',
+): ResolvedContact | null {
   if (!p) return null
+  // Reference-only Contact (ref: urn:...) carries no inline data.
+  if (typeof p === 'object' && 'ref' in p && (p as { ref?: string }).ref) return null
+  const name = pickName(p.name as LocalizedName[] | undefined, preferredSpelling)
   return {
-    name: displayName(p.name as Name | null | undefined),
-    organization: (p as { affiliation?: string }).affiliation ?? '',
+    name: displayName(name ?? undefined),
+    organization: pickString(p.affiliation as LocalizedString[] | undefined, preferredSpelling),
     email: primaryContactMethod(p.contact_methods as ContactMethod[] | undefined, 'email'),
     phone: primaryContactMethod(p.contact_methods as ContactMethod[] | undefined, 'phone'),
   }
 }
 
 // Extensions: pick a typed attribute out of a MeetingExtension list.
-//
-// Sites register their profile via `registerProfile()` so the lookup
-// is type-checked at compile time. Without registration, callers use
-// the lower-level `pickExtensionAttribute()` which returns the raw
-// value.
 
 export function pickExtensionAttribute(
   extensions: MeetingExtension[] | null | undefined,

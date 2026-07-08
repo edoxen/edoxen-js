@@ -1,14 +1,36 @@
-// i18n — localization helpers shared across all consumers.
+// i18n — per-field localization helpers for v3.0.
 //
-// Per the v2.1 design, every translatable entity (Decision, Meeting,
-// MeetingSeries, MeetingComponent, etc.) carries a `localizations[]`
-// array with one entry per available language. This module picks the
-// right entry per consumer locale.
+// Per the v3.0 design, every translatable field on every entity is
+// `Localized<String/Name>[]` — an array of `{ spelling, value }`
+// entries, one per ISO 24229 spelling/conversion system code. There
+// is no separate `localizations[]` collection; each field carries its
+// own language tags.
+//
+// `spelling` accepts both spelling-system codes (`zho-Hans`,
+// `ind-Latn-pre1972`) and conversion-system codes
+// (`acadsin:zho-Hani:Latn:2002`). Helpers below pick the right entry
+// per consumer spelling.
 
-// Locale — branded ISO 639 code (3-letter ISO 639-3 or 2-letter
-// ISO 639-1). Branded to prevent passing arbitrary strings where a
-// locale is expected.
-const LOCALE_RE = /^[a-z]{2,3}$/
+// Spelling — branded ISO 24229 code. Branded to prevent passing
+// arbitrary strings where a spelling code is expected.
+const SPELLING_RE = /^[a-z0-9][a-z0-9-]*(?::[a-z0-9][a-z0-9-]*){0,3}$/i
+
+export type Spelling = string & { readonly __brand: 'Spelling' }
+
+export function isSpelling(value: unknown): value is Spelling {
+  return typeof value === 'string' && SPELLING_RE.test(value)
+}
+
+export function buildSpelling(value: string): Spelling {
+  if (!SPELLING_RE.test(value)) {
+    throw new Error(`Invalid spelling code: ${value}`)
+  }
+  return value as Spelling
+}
+
+// Locale kept for backward compatibility with consumer date/number
+// formatting code (Intl uses BCP-47 tags).
+const LOCALE_RE = /^[a-z]{2,3}(-[A-Z][a-z]{3})?(-[A-Z]{2})?$/
 
 export type Locale = string & { readonly __brand: 'Locale' }
 
@@ -23,25 +45,41 @@ export function buildLocale(value: string): Locale {
   return value as Locale
 }
 
-export interface Localized<T = unknown> {
-  language_code: string
-  script?: string
-  [key: string]: unknown
-  readonly __localizationOf?: T
+// Localized — one entry of a per-field Localized collection.
+// `value` is the field's value for the given `spelling`.
+export interface Localized<TValue = string> {
+  spelling: string
+  value: TValue
+  extensions?: unknown[]
 }
 
-export function pickLocalization<T extends { language_code: string }>(
-  list: T[] | null | undefined,
-  preferred: Locale | string,
+// Pick the right entry out of a per-field Localized collection.
+// Returns `null` when no match and no fallback is allowed.
+export function pickLocalized<TValue>(
+  list: Localized<TValue>[] | null | undefined,
+  preferred: Spelling | string,
   fallback = true,
-): T | null {
+): Localized<TValue> | null {
   if (!Array.isArray(list) || list.length === 0) return null
-  const match = list.find((l) => l.language_code === preferred)
-  if (match) return match
+  const want = String(preferred)
+  const exact = list.find((l) => l.spelling === want)
+  if (exact) return exact
+  const lang = want.split('-')[0]
+  if (lang && lang.length <= 3) {
+    const langMatch = list.find((l) => l.spelling.split('-')[0] === lang)
+    if (langMatch) return langMatch
+  }
   return fallback ? (list[0] ?? null) : null
 }
 
-// ISO 639-3 → ISO 639-1 (best-effort). Falls back to the input.
+export function pickLocalizedValue(
+  list: Localized<string>[] | null | undefined,
+  preferred: Spelling | string,
+  fallback = true,
+): string {
+  return pickLocalized(list, preferred, fallback)?.value ?? ''
+}
+
 const THREE_TO_TWO: Record<string, string> = {
   eng: 'en', fra: 'fr', deu: 'de', spa: 'es', ita: 'it',
   jpn: 'ja', zho: 'zh', kor: 'ko', rus: 'ru', por: 'pt',
@@ -61,12 +99,10 @@ export function formatDate(
   if (!date) return ''
   const d = typeof date === 'string' ? new Date(date) : date
   if (isNaN(d.getTime())) return ''
-  // Intl expects BCP-47 ('en', 'fr-CA'); we get ISO 639-3 by default.
   const tag = locale.length === 3 ? iso6393To6391(locale) : locale
   return new Intl.DateTimeFormat(tag, opts).format(d)
 }
 
-// Compact date for timeline rows: "Oct 18".
 export function formatDateShort(
   date: string | Date | null | undefined,
   locale: Locale | string = 'en',

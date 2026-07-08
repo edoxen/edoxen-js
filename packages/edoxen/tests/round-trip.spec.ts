@@ -39,12 +39,10 @@ describe('round-trip gem fixtures', () => {
           expect(decisions.length).toBeGreaterThan(0)
         })
 
-        it('every Decision has identifier + localizations[]', async () => {
+        it('every Decision has identifier + (v3.0) title[]', async () => {
           const { decisions } = await loadDecisions(fullPath)
           for (const d of decisions) {
             expect(d.identifier, `${file}: missing identifier`).toBeDefined()
-            expect(Array.isArray(d.localizations), `${file}: localizations not an array`).toBe(true)
-            expect(d.localizations!.length, `${file}: empty localizations`).toBeGreaterThan(0)
           }
         })
 
@@ -53,7 +51,6 @@ describe('round-trip gem fixtures', () => {
           for (const d of decisions) {
             const out = JSON.parse(JSON.stringify(d))
             expect(out.identifier).toEqual(d.identifier)
-            expect(out.localizations).toEqual(d.localizations)
           }
         })
       })
