@@ -44,11 +44,10 @@ function buildDecisionVm(decision: Decision): DecisionViewModel {
   const identifier = identifierToDisplay(decision.identifier)
   const id = identifier.replace(/\//g, '-')
   const acclamation = isAcclamation(identifier)
-  const localization = Array.isArray(decision.localizations) ? decision.localizations[0] : null
-  const title = (localization?.title as string | undefined) ??
+  const title = decision.title?.[0]?.value ??
     (acclamation && decision.actions && decision.actions.length > 0 ? 'Acclamation' : '')
-  const subject = (localization?.subject as string | undefined) ?? ''
-  const message = (localization?.message as string | undefined) ?? subject
+  const subject = decision.subject?.[0]?.value ?? ''
+  const message = decision.message?.[0]?.value ?? subject
   return {
     id,
     identifier,
@@ -78,7 +77,7 @@ function firstYear(decision: Decision): string {
 export function uniqueActionTypes(decision: DecisionViewModel): string[] {
   const seen = new Set<string>()
   const out: string[] = []
-  for (const a of decision.actions) {
+  for (const a of decision.actions ?? []) {
     const t = (a as { type?: string }).type
     if (t && !seen.has(t)) {
       seen.add(t)
@@ -135,7 +134,7 @@ export function compareDecisions(
     return (a, b) => a.year.localeCompare(b.year) || a.id.localeCompare(b.id)
   }
   if (order === 'most_actions') {
-    return (a, b) => b.actions.length - a.actions.length || b.year.localeCompare(a.year)
+    return (a, b) => (b.actions?.length ?? 0) - (a.actions?.length ?? 0) || b.year.localeCompare(a.year)
   }
   return (a, b) => b.year.localeCompare(a.year) || b.id.localeCompare(a.id)
 }
