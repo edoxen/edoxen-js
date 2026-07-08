@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@edoxen/edoxen": "^0.1.0",
-    "@edoxen/vue": "^0.1.1",
+    "@edoxen/vue": "^0.1.0",
     "@asciidoctor/core": "^3.0.4",
     "flexsearch": "^0.7.31",
     "vue": "^3.5.0",
