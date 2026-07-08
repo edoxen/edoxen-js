@@ -1,6 +1,6 @@
-// URN — branded type + helpers for edoxen scoped URNs (v3.0).
+// URN — branded type + helpers for edoxen scoped URNs (1.0).
 //
-// v3.0 URN format: `urn:edoxen:{entity}:{scope}:{local-id}`.
+// 1.0 URN format: `urn:edoxen:{entity}:{scope}:{local-id}`.
 // Examples:
 //   urn:edoxen:contact:isotc154:jianfang-zhang
 //   urn:edoxen:venue:isotc154:fairmont-house-hkma
@@ -48,7 +48,7 @@ export function parseUrn(value: string): { nid: string; nss: string } | null {
   return { nid: m[1], nss: m[2] }
 }
 
-// Parse a v3.0 scoped URN. Returns null when not an edoxen scoped URN.
+// Parse a 1.0 scoped URN. Returns null when not an edoxen scoped URN.
 export function parseScopedUrn(value: string): ScopedUrnParts | null {
   const m = SCOPED_URN_RE.exec(value)
   if (!m || !m.groups) return null
@@ -63,7 +63,7 @@ export function isScopedUrn(value: unknown): value is Urn {
   return typeof value === 'string' && SCOPED_URN_RE.test(value)
 }
 
-// Format a v3.0 scoped URN from its parts.
+// Format a 1.0 scoped URN from its parts.
 export function formatScopedUrn(entity: string, scope: string, id: string): Urn {
   return buildUrn(`urn:edoxen:${entity}:${scope}:${id}`)
 }
