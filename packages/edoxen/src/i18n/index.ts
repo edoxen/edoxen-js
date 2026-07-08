@@ -1,6 +1,6 @@
-// i18n — per-field localization helpers for v3.0.
+// i18n — per-field localization helpers for 1.0.
 //
-// Per the v3.0 design, every translatable field on every entity is
+// Per the 1.0 design, every translatable field on every entity is
 // `Localized<String/Name>[]` — an array of `{ spelling, value }`
 // entries, one per ISO 24229 spelling/conversion system code. There
 // is no separate `localizations[]` collection; each field carries its

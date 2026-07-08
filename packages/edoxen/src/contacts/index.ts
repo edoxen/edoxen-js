@@ -1,6 +1,6 @@
-// Contacts — v3.0 Contact / Name / ContactMethod helpers.
+// Contacts — 1.0 Contact / Name / ContactMethod helpers.
 //
-// v3.0 per-field localization: every translatable field on Contact
+// 1.0 per-field localization: every translatable field on Contact
 // is `Localized<String|Name>[]`. The `name` field is an array of
 // `{ spelling, value: Name }` entries (per ISO 24229 spelling codes).
 // Use `displayName()` to pick a localized Name and render it.
@@ -23,7 +23,7 @@ export function displayName(name: Name | null | undefined): string {
     .join(' ')
 }
 
-// Pick a localized name from a v3.0 LocalizedName[] collection.
+// Pick a localized name from a 1.0 LocalizedName[] collection.
 // Returns the matching Name (or first, when fallback). Returns null
 // when the collection is empty.
 export function pickName(
@@ -35,7 +35,7 @@ export function pickName(
   return entry?.value ?? null
 }
 
-// Pick the first localized string value out of a v3.0 LocalizedString[]
+// Pick the first localized string value out of a 1.0 LocalizedString[]
 // collection. Used for title, affiliation, address, etc.
 export function pickString(
   list: LocalizedString[] | null | undefined,

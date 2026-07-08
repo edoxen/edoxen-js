@@ -3,7 +3,7 @@
 //
 // Types are auto-generated from the gem's canonical JSON Schemas.
 // Only types that json-schema-to-typescript emits are re-exported
-// here. Some v2.1 entities (VoteRecord, Motion, Voting, etc.) may
+// here. Some 1.0 entities (VoteRecord, Motion, Voting, etc.) may
 // require schema-tuning to surface as standalone interfaces; for
 // now, consumers that need them should cast through `Record<string,
 // unknown>` until TODO 02 is fully polished.
