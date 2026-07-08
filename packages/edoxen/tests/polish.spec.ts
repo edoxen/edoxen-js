@@ -19,10 +19,11 @@ import {
 import { normalizeDates } from '../src/load/normalizeDates.js'
 
 describe('branded types', () => {
-  it('buildLocale validates 2- or 3-letter codes', () => {
+  it('buildLocale validates ISO 639 codes with optional script + country', () => {
     expect(isLocale(buildLocale('en'))).toBe(true)
     expect(isLocale(buildLocale('fra'))).toBe(true)
-    expect(() => buildLocale('fr-CA')).toThrow(/Invalid locale/)
+    expect(isLocale(buildLocale('zho-Hans'))).toBe(true)
+    expect(isLocale(buildLocale('zho-Hans-CN'))).toBe(true)
     expect(() => buildLocale('english')).toThrow(/Invalid locale/)
   })
 

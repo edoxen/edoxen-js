@@ -60,7 +60,7 @@
     },
     "SourceUrl": {
       "type": "object",
-      "description": "Per-language canonical source URL (e.g. one PDF per language).",
+      "description": "Per-spelling canonical source URL (e.g. one PDF per language).",
       "additionalProperties": false,
       "required": [
         "ref"
@@ -72,9 +72,9 @@
         "format": {
           "type": "string"
         },
-        "language_code": {
+        "spelling": {
           "type": "string",
-          "pattern": "^[a-z]{3}$"
+          "description": "ISO 24229 spelling/conversion system code"
         },
         "kind": {
           "$ref": "#/$defs/SourceUrlKind"
@@ -110,6 +110,52 @@
         "message",
         "other"
       ]
+    },
+    "LocalizedString": {
+      "type": "object",
+      "description": "One language-specific value of a translatable String field.\n`spelling` is an ISO 24229 spelling/conversion system code.\nAlways verbose — single-language data uses the same\n`[{ spelling, value }]` shape as multi-language data.\n",
+      "additionalProperties": false,
+      "required": [
+        "spelling",
+        "value"
+      ],
+      "properties": {
+        "spelling": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MeetingExtension"
+          }
+        }
+      }
+    },
+    "LocalizedName": {
+      "type": "object",
+      "description": "One language-specific value of a translatable Name field.\nMirrors LocalizedString but carries a structured Name.\n",
+      "additionalProperties": false,
+      "required": [
+        "spelling",
+        "value"
+      ],
+      "properties": {
+        "spelling": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/Name"
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MeetingExtension"
+          }
+        }
+      }
     },
     "ContactMethod": {
       "type": "object",
@@ -201,11 +247,22 @@
     },
     "Contact": {
       "type": "object",
-      "description": "VCARD-like abstract contact. Generalises Person for cases where\nthe contact may be a person, an organisation, a department, a\nrole (\"Secretariat\"), or any other entity with a name and one or\nmore communication channels.\n",
+      "description": "VCARD-like abstract contact. v3.0: per-field Localized\n(name, title, affiliation, address). Added `urn` (registry\nidentity) and `ref` (reference-by-URN).\n",
       "additionalProperties": false,
       "properties": {
+        "ref": {
+          "type": "string",
+          "description": "URN reference; if set, ignore other fields"
+        },
+        "urn": {
+          "type": "string",
+          "pattern": "^urn:edoxen:contact:[^:]+:[^:]+$"
+        },
         "name": {
-          "$ref": "#/$defs/Name"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedName"
+          }
         },
         "kind": {
           "type": "string"
@@ -214,10 +271,16 @@
           "type": "string"
         },
         "title": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "affiliation": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "contact_methods": {
           "type": "array",
@@ -232,7 +295,10 @@
           }
         },
         "address": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "extensions": {
           "type": "array",
@@ -244,11 +310,21 @@
     },
     "Person": {
       "type": "object",
-      "description": "A Contact that is specifically an individual human. Inherits all\nContact fields. The old `email`, `phone`, and `orcid` fields are\nreplaced by entries in `contact_methods` (kind=email / kind=phone)\nand `identifiers` (kind=orcid).\n",
+      "description": "A Contact that is specifically an individual human. Schema\nduplicates Contact's properties because JSON-Schema draft-07\ndoesn't support `extends`. Same shape; semantically a subclass.\n",
       "additionalProperties": false,
       "properties": {
+        "ref": {
+          "type": "string"
+        },
+        "urn": {
+          "type": "string",
+          "pattern": "^urn:edoxen:contact:[^:]+:[^:]+$"
+        },
         "name": {
-          "$ref": "#/$defs/Name"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedName"
+          }
         },
         "kind": {
           "type": "string"
@@ -257,10 +333,16 @@
           "type": "string"
         },
         "title": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "affiliation": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "contact_methods": {
           "type": "array",
@@ -275,7 +357,10 @@
           }
         },
         "address": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "extensions": {
           "type": "array",
@@ -385,17 +470,23 @@
     },
     "MinutesSection": {
       "type": "object",
-      "description": "One section of a Meeting's minutes — typically tied to an agenda item by `number`.",
+      "description": "One section of a Meeting's minutes — typically tied to an agenda item by `number`. v3.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "number": {
           "type": "string"
         },
         "title": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "narrative": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "page_start": {
           "type": "integer"
@@ -413,7 +504,7 @@
     },
     "Minutes": {
       "type": "object",
-      "description": "The narrative record of a Meeting — what was said, by whom, in\nwhat order, with what outcome. Distinct from Agenda and from\nDecisionCollection.\n",
+      "description": "The narrative record of a Meeting. v3.0: per-document language_code\n+ script replaced by a single `spelling` (ISO 24229).\n",
       "additionalProperties": false,
       "properties": {
         "identifier": {
@@ -425,13 +516,9 @@
         "urn": {
           "type": "string"
         },
-        "language_code": {
+        "spelling": {
           "type": "string",
-          "pattern": "^[a-z]{3}$"
-        },
-        "script": {
-          "type": "string",
-          "pattern": "^[A-Z][a-z]{3}$"
+          "description": "ISO 24229 spelling/conversion system code"
         },
         "source_doc": {
           "type": "string"
@@ -449,7 +536,7 @@
     },
     "Deadline": {
       "type": "object",
-      "description": "A time-bound requirement (registration, submission, etc.).",
+      "description": "A time-bound requirement. v3.0: per-field Localized.",
       "additionalProperties": false,
       "required": [
         "date"
@@ -460,7 +547,10 @@
           "format": "date"
         },
         "description": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         }
       }
     },
@@ -476,13 +566,16 @@
           "type": "string"
         },
         "title": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         }
       }
     },
     "AgendaItem": {
       "type": "object",
-      "description": "One entry on an Agenda.",
+      "description": "One entry on an Agenda. v3.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "label": {
@@ -492,10 +585,16 @@
           "$ref": "#/$defs/AgendaItemKind"
         },
         "title": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "description": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "references": {
           "type": "array",
@@ -562,14 +661,17 @@
     },
     "TopicDocument": {
       "type": "object",
-      "description": "Text-bearing document about a Topic.",
+      "description": "Text-bearing document about a Topic. v3.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "identifier": {
           "type": "string"
         },
         "title": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "version": {
           "type": "string"
@@ -583,9 +685,9 @@
         "format": {
           "type": "string"
         },
-        "language_code": {
+        "spelling": {
           "type": "string",
-          "pattern": "^[a-z]{3}$"
+          "description": "ISO 24229 spelling/conversion system code"
         },
         "extensions": {
           "type": "array",
@@ -597,14 +699,17 @@
     },
     "TopicAsset": {
       "type": "object",
-      "description": "Non-text resource about a Topic.",
+      "description": "Non-text resource about a Topic. v3.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "identifier": {
           "type": "string"
         },
         "title": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "kind": {
           "type": "string"
@@ -625,7 +730,7 @@
     },
     "Topic": {
       "type": "object",
-      "description": "The subject of discussion at a Meeting.",
+      "description": "The subject of discussion at a Meeting. v3.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "identifier": {
@@ -635,10 +740,16 @@
           "type": "string"
         },
         "title": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "description": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "status": {
           "$ref": "#/$defs/TopicStatus"
@@ -686,20 +797,37 @@
     },
     "Venue": {
       "type": "object",
-      "description": "Polymorphic place where a Meeting happens. `kind` discriminates\nphysical vs virtual; all fields from both subtypes live here as\noptional siblings. Validators (Edoxen::VenueValidator) enforce\nthat fields match `kind`.\n",
+      "description": "Polymorphic place where a Meeting happens. `kind` discriminates\nphysical vs virtual; all fields from both subtypes live here as\noptional siblings. v3.0: per-field Localized (name, label,\ndescription, address, building, floor, room, access_notes).\nAdded `urn` (registry identity) and `ref` (reference-by-URN).\n",
       "additionalProperties": false,
       "properties": {
+        "ref": {
+          "type": "string",
+          "description": "URN reference; if set, ignore other fields"
+        },
+        "urn": {
+          "type": "string",
+          "pattern": "^urn:edoxen:venue:[^:]+:[^:]+$"
+        },
         "kind": {
           "$ref": "#/$defs/VenueKind"
         },
         "name": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "label": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "description": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "capacity": {
           "type": "integer"
@@ -722,7 +850,10 @@
           "pattern": "^[A-Z]{3}$"
         },
         "address": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "city": {
           "type": "string"
@@ -738,16 +869,28 @@
           "type": "number"
         },
         "building": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "floor": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "room": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "access_notes": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "uri": {
           "type": "string"
@@ -970,33 +1113,9 @@
         }
       }
     },
-    "ComponentLocalization": {
-      "type": "object",
-      "description": "Per-language content for a MeetingComponent.",
-      "additionalProperties": false,
-      "required": [
-        "language_code"
-      ],
-      "properties": {
-        "language_code": {
-          "type": "string",
-          "pattern": "^[a-z]{3}$"
-        },
-        "script": {
-          "type": "string",
-          "pattern": "^[A-Z][a-z]{3}$"
-        },
-        "title": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        }
-      }
-    },
     "MeetingComponent": {
       "type": "object",
-      "description": "Flat sub-event of a Meeting.",
+      "description": "Flat sub-event of a Meeting. v3.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "identifier": {
@@ -1012,10 +1131,16 @@
           "type": "string"
         },
         "title": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "description": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "starts_at": {
           "type": "string",
@@ -1026,7 +1151,10 @@
           "format": "date-time"
         },
         "time_label": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "venue_refs": {
           "type": "array",
@@ -1052,12 +1180,6 @@
             "type": "string"
           }
         },
-        "localizations": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/ComponentLocalization"
-          }
-        },
         "extensions": {
           "type": "array",
           "items": {
@@ -1068,7 +1190,7 @@
     },
     "MeetingSeries": {
       "type": "object",
-      "description": "Parent of recurring Meeting instances.",
+      "description": "Parent of recurring Meeting instances. v3.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "identifier": {
@@ -1081,10 +1203,16 @@
           "type": "string"
         },
         "name": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "description": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "recurrence": {
           "$ref": "#/$defs/Recurrence"
@@ -1115,6 +1243,9 @@
           "items": {
             "$ref": "#/$defs/MeetingExtension"
           }
+        },
+        "body_type": {
+          "type": "string"
         }
       }
     },
@@ -1139,36 +1270,9 @@
         }
       }
     },
-    "MeetingLocalization": {
-      "type": "object",
-      "description": "Per-language content for a Meeting.",
-      "additionalProperties": false,
-      "required": [
-        "language_code"
-      ],
-      "properties": {
-        "language_code": {
-          "type": "string",
-          "pattern": "^[a-z]{3}$"
-        },
-        "script": {
-          "type": "string",
-          "pattern": "^[A-Z][a-z]{3}$"
-        },
-        "title": {
-          "type": "string"
-        },
-        "general_area": {
-          "type": "string"
-        },
-        "practical_info": {
-          "type": "string"
-        }
-      }
-    },
     "Meeting": {
       "type": "object",
-      "description": "A single Meeting (event).",
+      "description": "A single Meeting (event). v3.0: per-field Localized.",
       "additionalProperties": false,
       "required": [
         "identifier",
@@ -1203,6 +1307,12 @@
         "body_type": {
           "type": "string"
         },
+        "title": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
+        },
         "date_range": {
           "$ref": "#/$defs/DateRange"
         },
@@ -1216,7 +1326,16 @@
           }
         },
         "general_area": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
+        },
+        "practical_info": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "city": {
           "type": "string",
@@ -1257,7 +1376,10 @@
           "type": "string"
         },
         "note": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "contact": {
           "$ref": "#/$defs/Contact"
@@ -1307,12 +1429,6 @@
             "$ref": "#/$defs/StructuredIdentifier"
           }
         },
-        "localizations": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/MeetingLocalization"
-          }
-        },
         "relations": {
           "type": "array",
           "items": {
@@ -1329,11 +1445,14 @@
     },
     "MeetingCollectionMetadata": {
       "type": "object",
-      "description": "Display-level metadata for a MeetingCollection.",
+      "description": "Display-level metadata for a MeetingCollection. v3.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "title": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
         },
         "source": {
           "type": "string"

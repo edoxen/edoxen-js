@@ -1,6 +1,52 @@
 // AUTO-GENERATED from src/schema/*.json. Do not edit by hand.
 
 /**
+ * Edoxen::Enums::SOURCE_URL_KIND.
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "SourceUrlKind".
+ */
+export type SourceUrlKind =
+  'agenda_pdf' | 'minutes_pdf' | 'decisions_pdf' | 'report_pdf' | 'register_url' | 'landing_page'
+/**
+ * Edoxen::Enums::DECISION_KIND.
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "DecisionKind".
+ */
+export type DecisionKind =
+  'resolution' | 'order' | 'ruling' | 'determination' | 'recommendation' | 'statement' | 'finding' | 'opinion' | 'other'
+/**
+ * Edoxen::Enums::DECISION_STATUS.
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "DecisionStatus".
+ */
+export type DecisionStatus =
+  'draft' | 'proposed' | 'under_consideration' | 'decided' | 'negatived' | 'withdrawn' | 'deferred'
+/**
+ * Edoxen::Enums::DECISION_DATE_TYPE.
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "DecisionDateType".
+ */
+export type DecisionDateType =
+  'adoption' | 'drafted' | 'discussed' | 'proposed' | 'decided' | 'negatived' | 'withdrawn' | 'published' | 'effective'
+/**
+ * Edoxen::Enums::DECISION_RELATION_TYPE.
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "DecisionRelationType".
+ */
+export type DecisionRelationType = 'annex_of' | 'has_annex' | 'updates' | 'refines' | 'replaces' | 'considers' | 'cites'
+/**
+ * Edoxen::Enums::URL_KIND.
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "UrlKind".
+ */
+export type UrlKind = 'access' | 'report'
+/**
  * Consideration verb. Edoxen::Enums::CONSIDERATION_TYPE lists the
  * canonical set. The schema is permissive — adopters may use
  * body-specific verbs outside the canonical set (same rationale as
@@ -11,14 +57,6 @@
  * via the `definition` "ConsiderationType".
  */
 export type ConsiderationType = string
-/**
- * Edoxen::Enums::DECISION_DATE_TYPE.
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "DecisionDateType".
- */
-export type DecisionDateType =
-  'adoption' | 'drafted' | 'discussed' | 'proposed' | 'decided' | 'negatived' | 'withdrawn' | 'published' | 'effective'
 /**
  * Edoxen::Enums::APPROVAL_TYPE.
  *
@@ -46,44 +84,6 @@ export type ApprovalDegree = 'unanimous' | 'majority' | 'minority'
  * via the `definition` "ActionType".
  */
 export type ActionType = string
-/**
- * Edoxen::Enums::SOURCE_URL_KIND.
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "SourceUrlKind".
- */
-export type SourceUrlKind =
-  'agenda_pdf' | 'minutes_pdf' | 'decisions_pdf' | 'report_pdf' | 'register_url' | 'landing_page'
-/**
- * Edoxen::Enums::DECISION_KIND.
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "DecisionKind".
- */
-export type DecisionKind =
-  'resolution' | 'order' | 'ruling' | 'determination' | 'recommendation' | 'statement' | 'finding' | 'opinion' | 'other'
-/**
- * Edoxen::Enums::DECISION_STATUS.
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "DecisionStatus".
- */
-export type DecisionStatus =
-  'draft' | 'proposed' | 'under_consideration' | 'decided' | 'negatived' | 'withdrawn' | 'deferred'
-/**
- * Edoxen::Enums::DECISION_RELATION_TYPE.
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "DecisionRelationType".
- */
-export type DecisionRelationType = 'annex_of' | 'has_annex' | 'updates' | 'refines' | 'replaces' | 'considers' | 'cites'
-/**
- * Edoxen::Enums::URL_KIND.
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "UrlKind".
- */
-export type UrlKind = 'access' | 'report'
 /**
  * Polymorphic communication channel kind.
  *
@@ -296,14 +296,13 @@ export interface EdoxenDecisionCollectionSchema {
   decisions: Decision[]
 }
 /**
- * Collection-level metadata (title, meeting date, source, source URLs, host venue).
+ * Collection-level metadata (localized title, meeting date, source, source URLs, host venue).
  *
  * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
  * via the `definition` "DecisionMetadata".
  */
 export interface DecisionMetadata {
-  title?: string
-  title_localized?: Localization[]
+  title?: LocalizedString[]
   date?: string
   source?: string
   source_urls?: SourceUrl[]
@@ -314,94 +313,19 @@ export interface DecisionMetadata {
   extensions?: MeetingExtension[]
 }
 /**
- * A monolingual rendering of a Decision. Mirrors the glossarist
- * LocalizedConcept pattern: language-agnostic fields live on the
- * parent Decision; per-language content lives here.
+ * One language-specific value of a translatable String field.
+ * `spelling` is an ISO 24229 spelling/conversion system code.
+ * Always verbose — single-language data uses the same
+ * `[{ spelling, value }]` shape as multi-language data.
  *
  *
  * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "Localization".
+ * via the `definition` "LocalizedString".
  */
-export interface Localization {
-  language_code: string
-  script?: string
-  title?: string
-  subject?: string
-  message?: string
-  considering?: string
-  considerations?: Consideration[]
-  approvals?: Approval[]
-  actions?: Action[]
-}
-/**
- * The basis for a Decision: a verb + one effective date + reasoning.
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "Consideration".
- */
-export interface Consideration {
-  type: ConsiderationType
-  date_effective: DecisionDate
-  message: string
-}
-/**
- * Date with semantic kind (adoption / drafted / discussed).
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "DecisionDate".
- */
-export interface DecisionDate {
-  date: string
-  type: DecisionDateType
-}
-/**
- * Approval record: vote type, consensus degree, date, message.
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "Approval".
- */
-export interface Approval {
-  type: ApprovalType
-  degree: ApprovalDegree
-  date: DecisionDate
-  message?: string
-}
-/**
- * A verb + one effective date + human-readable message.
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "Action".
- */
-export interface Action {
-  type: ActionType
-  date_effective: DecisionDate
-  message: string
-}
-/**
- * Per-language canonical source URL (e.g. one PDF per language).
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "SourceUrl".
- */
-export interface SourceUrl {
-  ref: string
-  format?: string
-  language_code?: string
-  kind?: SourceUrlKind
-}
-/**
- * One entry in a per-dataset body_vocabulary list. Maps a free-form
- * body_type to a short canonical value. SSOT for body_type ->
- * canonical_type resolution within the declaring collection.
- *
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "BodyVocabularyEntry".
- */
-export interface BodyVocabularyEntry {
-  body_type?: string
-  canonical_type?: string
-  definition?: string
+export interface LocalizedString {
+  spelling: string
+  value: string
+  extensions?: MeetingExtension[]
 }
 /**
  * Profile-specific extension. Adopters register their namespace via
@@ -441,8 +365,37 @@ export interface ExtensionAttribute {
   dateTimeValue?: string
 }
 /**
- * A formal Decision. Language-agnostic admin fields live here;
- * every translatable field is wrapped inside `localizations[]`.
+ * Per-spelling canonical source URL (e.g. one PDF per language).
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "SourceUrl".
+ */
+export interface SourceUrl {
+  ref: string
+  format?: string
+  /**
+   * ISO 24229 spelling/conversion system code
+   */
+  spelling?: string
+  kind?: SourceUrlKind
+}
+/**
+ * One entry in a per-dataset body_vocabulary list. Maps a free-form
+ * body_type to a short canonical value. SSOT for body_type ->
+ * canonical_type resolution within the declaring collection.
+ *
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "BodyVocabularyEntry".
+ */
+export interface BodyVocabularyEntry {
+  body_type?: string
+  canonical_type?: string
+  definition?: string
+}
+/**
+ * A formal Decision. v3.0: per-field Localized (every translatable
+ * field carries its own spelling tag). Removed `localizations[]`.
  *
  *
  * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
@@ -467,10 +420,13 @@ export interface Decision {
   brought_by_motions?: string[]
   about_topics?: string[]
   made_in_component?: string
-  /**
-   * @minItems 1
-   */
-  localizations: [Localization, ...Localization[]]
+  title?: LocalizedString[]
+  subject?: LocalizedString[]
+  message?: LocalizedString[]
+  considering?: LocalizedString[]
+  considerations?: Consideration[]
+  approvals?: Approval[]
+  actions?: Action[]
   extensions?: MeetingExtension[]
 }
 /**
@@ -482,6 +438,16 @@ export interface Decision {
 export interface StructuredIdentifier {
   prefix: string
   number: string
+}
+/**
+ * Date with semantic kind (adoption / drafted / discussed).
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "DecisionDate".
+ */
+export interface DecisionDate {
+  date: string
+  type: DecisionDateType
 }
 /**
  * Identifies the meeting a Decision belongs to.
@@ -516,6 +482,40 @@ export interface Url {
   format?: string
 }
 /**
+ * The basis for a Decision: a verb + one effective date + reasoning.
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "Consideration".
+ */
+export interface Consideration {
+  type: ConsiderationType
+  date_effective: DecisionDate
+  message: LocalizedString[]
+}
+/**
+ * Approval record: vote type, consensus degree, date, message.
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "Approval".
+ */
+export interface Approval {
+  type: ApprovalType
+  degree: ApprovalDegree
+  date: DecisionDate
+  message?: LocalizedString[]
+}
+/**
+ * A verb + one effective date + human-readable message.
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "Action".
+ */
+export interface Action {
+  type: ActionType
+  date_effective: DecisionDate
+  message: LocalizedString[]
+}
+/**
  * Typed cross-reference between entities (v2.1, TODO.refactor/44).
  * Exactly one of `urn`, `identifier`, or `local_ref` should be set;
  * the gem's `EntityRef#valid?` enforces this in Ruby.
@@ -533,44 +533,16 @@ export interface EntityRef {
   note?: string
 }
 /**
- * A procedural act that brings a Decision.
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "Motion".
- */
-export interface Motion {
-  identifier?: string
-  urn?: string
-  text?: string
-  mover?: Person
-  seconders?: Person[]
-  status?: MotionStatus
-  introduced_at?: string
-  proposed_decision?: string
-  resulting_decision?: string
-  resulting_decision_ref?: EntityRef
-  votings?: string[]
-  extensions?: MeetingExtension[]
-}
-/**
- * A Contact that is specifically an individual human. Inherits all
- * Contact fields. The old `email`, `phone`, and `orcid` fields are
- * replaced by entries in `contact_methods` (kind=email / kind=phone)
- * and `identifiers` (kind=orcid).
+ * One language-specific value of a translatable Name field.
+ * Mirrors LocalizedString but carries a structured Name.
  *
  *
  * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "Person".
+ * via the `definition` "LocalizedName".
  */
-export interface Person {
-  name?: Name
-  kind?: string
-  role?: string
-  title?: string
-  affiliation?: string
-  contact_methods?: ContactMethod[]
-  identifiers?: ContactIdentifier[]
-  address?: string
+export interface LocalizedName {
+  spelling: string
+  value: Name
   extensions?: MeetingExtension[]
 }
 /**
@@ -590,6 +562,48 @@ export interface Name {
   additional?: string
   prefix?: string
   suffix?: string
+  extensions?: MeetingExtension[]
+}
+/**
+ * A procedural act that brings a Decision.
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "Motion".
+ */
+export interface Motion {
+  identifier?: string
+  urn?: string
+  text?: LocalizedString[]
+  mover?: Person
+  seconders?: Person[]
+  status?: MotionStatus
+  introduced_at?: string
+  proposed_decision?: string
+  resulting_decision?: string
+  resulting_decision_ref?: EntityRef
+  votings?: string[]
+  extensions?: MeetingExtension[]
+}
+/**
+ * A Contact that is specifically an individual human. Schema
+ * duplicates Contact's properties because JSON-Schema draft-07
+ * doesn't support `extends`. Same shape; semantically a subclass.
+ *
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "Person".
+ */
+export interface Person {
+  ref?: string
+  urn?: string
+  name?: LocalizedName[]
+  kind?: string
+  role?: string
+  title?: LocalizedString[]
+  affiliation?: LocalizedString[]
+  contact_methods?: ContactMethod[]
+  identifiers?: ContactIdentifier[]
+  address?: LocalizedString[]
   extensions?: MeetingExtension[]
 }
 /**
@@ -675,37 +689,40 @@ export interface VoteRecord {
   extensions?: MeetingExtension[]
 }
 /**
- * Text-bearing document about a Topic.
+ * Text-bearing document about a Topic. v3.0: per-field Localized.
  *
  * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
  * via the `definition` "TopicDocument".
  */
 export interface TopicDocument {
   identifier?: string
-  title?: string
+  title?: LocalizedString[]
   version?: string
   status?: string
   url?: string
   format?: string
-  language_code?: string
+  /**
+   * ISO 24229 spelling/conversion system code
+   */
+  spelling?: string
   extensions?: MeetingExtension[]
 }
 /**
- * Non-text resource about a Topic.
+ * Non-text resource about a Topic. v3.0: per-field Localized.
  *
  * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
  * via the `definition` "TopicAsset".
  */
 export interface TopicAsset {
   identifier?: string
-  title?: string
+  title?: LocalizedString[]
   kind?: string
   url?: string
   format?: string
   extensions?: MeetingExtension[]
 }
 /**
- * The subject of discussion at a Meeting.
+ * The subject of discussion at a Meeting. v3.0: per-field Localized.
  *
  * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
  * via the `definition` "Topic".
@@ -713,8 +730,8 @@ export interface TopicAsset {
 export interface Topic {
   identifier?: string
   urn?: string
-  title?: string
-  description?: string
+  title?: LocalizedString[]
+  description?: LocalizedString[]
   status?: TopicStatus
   resumption_of?: string
   documents?: TopicDocument[]
@@ -733,37 +750,43 @@ export interface Topic {
 export interface Reference {
   ref?: string
   kind?: string
-  title?: string
+  title?: LocalizedString[]
 }
 /**
  * Polymorphic place where a Meeting happens. `kind` discriminates
  * physical vs virtual; all fields from both subtypes live here as
- * optional siblings. Validators (Edoxen::VenueValidator) enforce
- * that fields match `kind`.
+ * optional siblings. v3.0: per-field Localized (name, label,
+ * description, address, building, floor, room, access_notes).
+ * Added `urn` (registry identity) and `ref` (reference-by-URN).
  *
  *
  * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
  * via the `definition` "Venue".
  */
 export interface Venue {
+  /**
+   * URN reference; if set, ignore other fields
+   */
+  ref?: string
+  urn?: string
   kind?: VenueKind
-  name?: string
-  label?: string
-  description?: string
+  name?: LocalizedString[]
+  label?: LocalizedString[]
+  description?: LocalizedString[]
   capacity?: number
   url?: string
   contact_methods?: ContactMethod[]
   unlocode?: string
   iata_code?: string
-  address?: string
+  address?: LocalizedString[]
   city?: string
   country_code?: string
   lat?: number
   lon?: number
-  building?: string
-  floor?: string
-  room?: string
-  access_notes?: string
+  building?: LocalizedString[]
+  floor?: LocalizedString[]
+  room?: LocalizedString[]
+  access_notes?: LocalizedString[]
   uri?: string
   features?: VirtualFeature[]
   passcode?: string
@@ -807,24 +830,28 @@ export interface Recurrence {
   extensions?: MeetingExtension[]
 }
 /**
- * VCARD-like abstract contact. Generalises Person for cases where
- * the contact may be a person, an organisation, a department, a
- * role ("Secretariat"), or any other entity with a name and one or
- * more communication channels.
+ * VCARD-like abstract contact. v3.0: per-field Localized
+ * (name, title, affiliation, address). Added `urn` (registry
+ * identity) and `ref` (reference-by-URN).
  *
  *
  * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
  * via the `definition` "Contact".
  */
 export interface Contact {
-  name?: Name
+  /**
+   * URN reference; if set, ignore other fields
+   */
+  ref?: string
+  urn?: string
+  name?: LocalizedName[]
   kind?: string
   role?: string
-  title?: string
-  affiliation?: string
+  title?: LocalizedString[]
+  affiliation?: LocalizedString[]
   contact_methods?: ContactMethod[]
   identifiers?: ContactIdentifier[]
-  address?: string
+  address?: LocalizedString[]
   extensions?: MeetingExtension[]
 }
 /**
@@ -841,19 +868,7 @@ export interface Officer {
   extensions?: MeetingExtension[]
 }
 /**
- * Per-language content for a MeetingComponent.
- *
- * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
- * via the `definition` "ComponentLocalization".
- */
-export interface ComponentLocalization {
-  language_code: string
-  script?: string
-  title?: string
-  description?: string
-}
-/**
- * Flat sub-event of a Meeting.
+ * Flat sub-event of a Meeting. v3.0: per-field Localized.
  *
  * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
  * via the `definition` "MeetingComponent".
@@ -863,21 +878,20 @@ export interface MeetingComponent {
   urn?: string
   kind?: ComponentKind
   body_type?: string
-  title?: string
-  description?: string
+  title?: LocalizedString[]
+  description?: LocalizedString[]
   starts_at?: string
   ends_at?: string
-  time_label?: string
+  time_label?: LocalizedString[]
   venue_refs?: string[]
   officers?: Officer[]
   agenda_ref?: string
   minutes_ref?: string
   attendance_refs?: string[]
-  localizations?: ComponentLocalization[]
   extensions?: MeetingExtension[]
 }
 /**
- * Parent of recurring Meeting instances.
+ * Parent of recurring Meeting instances. v3.0: per-field Localized.
  *
  * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
  * via the `definition` "MeetingSeries".
@@ -885,8 +899,8 @@ export interface MeetingComponent {
 export interface MeetingSeries {
   identifier?: StructuredIdentifier[]
   urn?: string
-  name?: string
-  description?: string
+  name?: LocalizedString[]
+  description?: LocalizedString[]
   recurrence?: Recurrence
   term?: string
   contact?: Contact
@@ -894,6 +908,7 @@ export interface MeetingSeries {
   kind?: string
   meeting_refs?: string[]
   extensions?: MeetingExtension[]
+  body_type?: string
 }
 /**
  * Typed reference to a hosting organization.
@@ -906,4 +921,32 @@ export interface HostRef {
   type?: HostType
   role?: string
   contact?: Contact
+}
+/**
+ * Registry of Contacts indexed by scoped URN. Members carry
+ * `urn: urn:edoxen:contact:{scope}:{local-id}`; the collection's
+ * `scope` MUST match the scope segment in member URNs.
+ *
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "ContactCollection".
+ */
+export interface ContactCollection {
+  scope?: string
+  title?: LocalizedString[]
+  contacts?: Contact[]
+  extensions?: MeetingExtension[]
+}
+/**
+ * Registry of Venues indexed by scoped URN. Mirrors ContactCollection.
+ *
+ *
+ * This interface was referenced by `EdoxenDecisionCollectionSchema`'s JSON-Schema
+ * via the `definition` "VenueCollection".
+ */
+export interface VenueCollection {
+  scope?: string
+  title?: LocalizedString[]
+  venues?: Venue[]
+  extensions?: MeetingExtension[]
 }

@@ -166,12 +166,55 @@ export interface MeetingCollection {
   meetings: Meeting[]
 }
 /**
- * Display-level metadata for a MeetingCollection.
+ * Display-level metadata for a MeetingCollection. v3.0: per-field Localized.
  */
 export interface MeetingCollectionMetadata {
-  title?: string
+  title?: LocalizedString[]
   source?: string
   body_vocabulary?: BodyVocabularyEntry[]
+}
+/**
+ * One language-specific value of a translatable String field.
+ * `spelling` is an ISO 24229 spelling/conversion system code.
+ * Always verbose — single-language data uses the same
+ * `[{ spelling, value }]` shape as multi-language data.
+ *
+ */
+export interface LocalizedString {
+  spelling: string
+  value: string
+  extensions?: MeetingExtension[]
+}
+/**
+ * Profile-specific extension. Adopters register their namespace via
+ * `profile` and discriminate via `kind`. Field semantics tightened
+ * v2.1 (TODO.refactor/47): `kind` is the in-profile discriminator,
+ * `ref` is the URN of an external profile document, and the
+ * recursive `extensions[]` slot was removed (YAGNI — use dotted
+ * keys in `attributes[]` for nesting).
+ *
+ */
+export interface MeetingExtension {
+  profile?: string
+  kind?: string
+  ref?: string
+  attributes?: ExtensionAttribute[]
+}
+/**
+ * One typed key/value pair within a MeetingExtension. Polymorphic on
+ * value type so consumers don't re-parse strings back into Int/Float/
+ * Bool/Date (v2.1 tighten, TODO.refactor/47).
+ *
+ */
+export interface ExtensionAttribute {
+  key?: string
+  type?: 'string' | 'integer' | 'float' | 'boolean' | 'date' | 'datetime'
+  value?: string
+  intValue?: number
+  floatValue?: number
+  booleanValue?: boolean
+  dateValue?: string
+  dateTimeValue?: string
 }
 /**
  * One entry in a per-dataset body_vocabulary list. Maps a free-form
@@ -185,7 +228,7 @@ export interface BodyVocabularyEntry {
   definition?: string
 }
 /**
- * A single Meeting (event).
+ * A single Meeting (event). v3.0: per-field Localized.
  */
 export interface Meeting {
   /**
@@ -199,10 +242,12 @@ export interface Meeting {
   status?: MeetingStatus
   visibility?: Visibility
   body_type?: string
+  title?: LocalizedString[]
   date_range?: DateRange
   recurrence?: Recurrence
   venues?: Venue[]
-  general_area?: string
+  general_area?: LocalizedString[]
+  practical_info?: LocalizedString[]
   city?: string
   country_code?: string
   committee?: string
@@ -212,7 +257,7 @@ export interface Meeting {
   source_urls?: SourceUrl[]
   landing_url?: string
   registration_url?: string
-  note?: string
+  note?: LocalizedString[]
   contact?: Contact
   agenda?: Agenda
   components?: MeetingComponent[]
@@ -222,7 +267,6 @@ export interface Meeting {
   decisions?: StructuredIdentifier[]
   motions?: StructuredIdentifier[]
   votings?: StructuredIdentifier[]
-  localizations?: MeetingLocalization[]
   relations?: MeetingRelation[]
   extensions?: MeetingExtension[]
 }
@@ -268,62 +312,37 @@ export interface RecurrenceByDay {
   weekday?: string
 }
 /**
- * Profile-specific extension. Adopters register their namespace via
- * `profile` and discriminate via `kind`. Field semantics tightened
- * v2.1 (TODO.refactor/47): `kind` is the in-profile discriminator,
- * `ref` is the URN of an external profile document, and the
- * recursive `extensions[]` slot was removed (YAGNI — use dotted
- * keys in `attributes[]` for nesting).
- *
- */
-export interface MeetingExtension {
-  profile?: string
-  kind?: string
-  ref?: string
-  attributes?: ExtensionAttribute[]
-}
-/**
- * One typed key/value pair within a MeetingExtension. Polymorphic on
- * value type so consumers don't re-parse strings back into Int/Float/
- * Bool/Date (v2.1 tighten, TODO.refactor/47).
- *
- */
-export interface ExtensionAttribute {
-  key?: string
-  type?: 'string' | 'integer' | 'float' | 'boolean' | 'date' | 'datetime'
-  value?: string
-  intValue?: number
-  floatValue?: number
-  booleanValue?: boolean
-  dateValue?: string
-  dateTimeValue?: string
-}
-/**
  * Polymorphic place where a Meeting happens. `kind` discriminates
  * physical vs virtual; all fields from both subtypes live here as
- * optional siblings. Validators (Edoxen::VenueValidator) enforce
- * that fields match `kind`.
+ * optional siblings. v3.0: per-field Localized (name, label,
+ * description, address, building, floor, room, access_notes).
+ * Added `urn` (registry identity) and `ref` (reference-by-URN).
  *
  */
 export interface Venue {
+  /**
+   * URN reference; if set, ignore other fields
+   */
+  ref?: string
+  urn?: string
   kind?: VenueKind
-  name?: string
-  label?: string
-  description?: string
+  name?: LocalizedString[]
+  label?: LocalizedString[]
+  description?: LocalizedString[]
   capacity?: number
   url?: string
   contact_methods?: ContactMethod[]
   unlocode?: string
   iata_code?: string
-  address?: string
+  address?: LocalizedString[]
   city?: string
   country_code?: string
   lat?: number
   lon?: number
-  building?: string
-  floor?: string
-  room?: string
-  access_notes?: string
+  building?: LocalizedString[]
+  floor?: LocalizedString[]
+  room?: LocalizedString[]
+  access_notes?: LocalizedString[]
   uri?: string
   features?: VirtualFeature[]
   passcode?: string
@@ -359,21 +378,32 @@ export interface Officer {
   extensions?: MeetingExtension[]
 }
 /**
- * A Contact that is specifically an individual human. Inherits all
- * Contact fields. The old `email`, `phone`, and `orcid` fields are
- * replaced by entries in `contact_methods` (kind=email / kind=phone)
- * and `identifiers` (kind=orcid).
+ * A Contact that is specifically an individual human. Schema
+ * duplicates Contact's properties because JSON-Schema draft-07
+ * doesn't support `extends`. Same shape; semantically a subclass.
  *
  */
 export interface Person {
-  name?: Name
+  ref?: string
+  urn?: string
+  name?: LocalizedName[]
   kind?: string
   role?: string
-  title?: string
-  affiliation?: string
+  title?: LocalizedString[]
+  affiliation?: LocalizedString[]
   contact_methods?: ContactMethod[]
   identifiers?: ContactIdentifier[]
-  address?: string
+  address?: LocalizedString[]
+  extensions?: MeetingExtension[]
+}
+/**
+ * One language-specific value of a translatable Name field.
+ * Mirrors LocalizedString but carries a structured Name.
+ *
+ */
+export interface LocalizedName {
+  spelling: string
+  value: Name
   extensions?: MeetingExtension[]
 }
 /**
@@ -414,30 +444,37 @@ export interface HostRef {
   contact?: Contact
 }
 /**
- * VCARD-like abstract contact. Generalises Person for cases where
- * the contact may be a person, an organisation, a department, a
- * role ("Secretariat"), or any other entity with a name and one or
- * more communication channels.
+ * VCARD-like abstract contact. v3.0: per-field Localized
+ * (name, title, affiliation, address). Added `urn` (registry
+ * identity) and `ref` (reference-by-URN).
  *
  */
 export interface Contact {
-  name?: Name
+  /**
+   * URN reference; if set, ignore other fields
+   */
+  ref?: string
+  urn?: string
+  name?: LocalizedName[]
   kind?: string
   role?: string
-  title?: string
-  affiliation?: string
+  title?: LocalizedString[]
+  affiliation?: LocalizedString[]
   contact_methods?: ContactMethod[]
   identifiers?: ContactIdentifier[]
-  address?: string
+  address?: LocalizedString[]
   extensions?: MeetingExtension[]
 }
 /**
- * Per-language canonical source URL (e.g. one PDF per language).
+ * Per-spelling canonical source URL (e.g. one PDF per language).
  */
 export interface SourceUrl {
   ref: string
   format?: string
-  language_code?: string
+  /**
+   * ISO 24229 spelling/conversion system code
+   */
+  spelling?: string
   kind?: SourceUrlKind
 }
 /**
@@ -453,13 +490,13 @@ export interface Agenda {
   extensions?: MeetingExtension[]
 }
 /**
- * One entry on an Agenda.
+ * One entry on an Agenda. v3.0: per-field Localized.
  */
 export interface AgendaItem {
   label?: string
   kind?: AgendaItemKind
-  title?: string
-  description?: string
+  title?: LocalizedString[]
+  description?: LocalizedString[]
   references?: Reference[]
   outcome?: AgendaItemOutcome
   decision_ref?: string
@@ -473,16 +510,16 @@ export interface AgendaItem {
 export interface Reference {
   ref?: string
   kind?: string
-  title?: string
+  title?: LocalizedString[]
 }
 /**
- * The subject of discussion at a Meeting.
+ * The subject of discussion at a Meeting. v3.0: per-field Localized.
  */
 export interface Topic {
   identifier?: string
   urn?: string
-  title?: string
-  description?: string
+  title?: LocalizedString[]
+  description?: LocalizedString[]
   status?: TopicStatus
   resumption_of?: string
   documents?: TopicDocument[]
@@ -493,65 +530,58 @@ export interface Topic {
   extensions?: MeetingExtension[]
 }
 /**
- * Text-bearing document about a Topic.
+ * Text-bearing document about a Topic. v3.0: per-field Localized.
  */
 export interface TopicDocument {
   identifier?: string
-  title?: string
+  title?: LocalizedString[]
   version?: string
   status?: string
   url?: string
   format?: string
-  language_code?: string
+  /**
+   * ISO 24229 spelling/conversion system code
+   */
+  spelling?: string
   extensions?: MeetingExtension[]
 }
 /**
- * Non-text resource about a Topic.
+ * Non-text resource about a Topic. v3.0: per-field Localized.
  */
 export interface TopicAsset {
   identifier?: string
-  title?: string
+  title?: LocalizedString[]
   kind?: string
   url?: string
   format?: string
   extensions?: MeetingExtension[]
 }
 /**
- * Flat sub-event of a Meeting.
+ * Flat sub-event of a Meeting. v3.0: per-field Localized.
  */
 export interface MeetingComponent {
   identifier?: string
   urn?: string
   kind?: ComponentKind
   body_type?: string
-  title?: string
-  description?: string
+  title?: LocalizedString[]
+  description?: LocalizedString[]
   starts_at?: string
   ends_at?: string
-  time_label?: string
+  time_label?: LocalizedString[]
   venue_refs?: string[]
   officers?: Officer[]
   agenda_ref?: string
   minutes_ref?: string
   attendance_refs?: string[]
-  localizations?: ComponentLocalization[]
   extensions?: MeetingExtension[]
 }
 /**
- * Per-language content for a MeetingComponent.
- */
-export interface ComponentLocalization {
-  language_code: string
-  script?: string
-  title?: string
-  description?: string
-}
-/**
- * A time-bound requirement (registration, submission, etc.).
+ * A time-bound requirement. v3.0: per-field Localized.
  */
 export interface Deadline {
   date: string
-  description?: string
+  description?: LocalizedString[]
 }
 /**
  * One attendance record per person at a Meeting.
@@ -567,40 +597,31 @@ export interface Attendance {
   extensions?: MeetingExtension[]
 }
 /**
- * The narrative record of a Meeting — what was said, by whom, in
- * what order, with what outcome. Distinct from Agenda and from
- * DecisionCollection.
+ * The narrative record of a Meeting. v3.0: per-document language_code
+ * + script replaced by a single `spelling` (ISO 24229).
  *
  */
 export interface Minutes {
   identifier?: StructuredIdentifier[]
   urn?: string
-  language_code?: string
-  script?: string
+  /**
+   * ISO 24229 spelling/conversion system code
+   */
+  spelling?: string
   source_doc?: string
   source_pages?: string
   sections?: MinutesSection[]
 }
 /**
- * One section of a Meeting's minutes — typically tied to an agenda item by `number`.
+ * One section of a Meeting's minutes — typically tied to an agenda item by `number`. v3.0: per-field Localized.
  */
 export interface MinutesSection {
   number?: string
-  title?: string
-  narrative?: string
+  title?: LocalizedString[]
+  narrative?: LocalizedString[]
   page_start?: number
   page_end?: number
   references?: Reference[]
-}
-/**
- * Per-language content for a Meeting.
- */
-export interface MeetingLocalization {
-  language_code: string
-  script?: string
-  title?: string
-  general_area?: string
-  practical_info?: string
 }
 /**
  * Directed link between two meetings.
@@ -611,13 +632,13 @@ export interface MeetingRelation {
   type: MeetingRelationType
 }
 /**
- * Parent of recurring Meeting instances.
+ * Parent of recurring Meeting instances. v3.0: per-field Localized.
  */
 export interface MeetingSeries {
   identifier?: StructuredIdentifier[]
   urn?: string
-  name?: string
-  description?: string
+  name?: LocalizedString[]
+  description?: LocalizedString[]
   recurrence?: Recurrence
   term?: string
   contact?: Contact
@@ -625,4 +646,5 @@ export interface MeetingSeries {
   kind?: string
   meeting_refs?: string[]
   extensions?: MeetingExtension[]
+  body_type?: string
 }
