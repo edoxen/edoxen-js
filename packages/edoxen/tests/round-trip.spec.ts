@@ -60,13 +60,18 @@ describe('round-trip gem fixtures', () => {
   describe.skipIf(!haveGem)('meeting fixtures', () => {
     for (const file of yamlFiles(MEETINGS_DIR)) {
       const fullPath = path.join(MEETINGS_DIR, file)
+      const isSeries = /series/i.test(file)
       describe(file, () => {
-        it('loads as a Meeting / MeetingCollection', async () => {
-          const { meetings } = await loadMeetings(fullPath)
-          expect(meetings.length).toBeGreaterThan(0)
+        it(isSeries ? 'loads as a MeetingSeries' : 'loads as a Meeting / MeetingCollection', async () => {
+          const { meetings, series } = await loadMeetings(fullPath)
+          if (isSeries) {
+            expect((series ?? []).length, `${file}: expected at least one series`).toBeGreaterThan(0)
+          } else {
+            expect(meetings.length, `${file}: expected at least one meeting`).toBeGreaterThan(0)
+          }
         })
 
-        it('every Meeting has identifier + type', async () => {
+        it.skipIf(isSeries)('every Meeting has identifier + type', async () => {
           const { meetings } = await loadMeetings(fullPath)
           for (const m of meetings) {
             expect(m.identifier, `${file}: missing identifier`).toBeDefined()
