@@ -2,13 +2,12 @@
 // pre-processes the PDF-extracted bullet artefacts that the gem's
 // fixtures carry (PUA range U+E000–U+F8FF).
 //
-// Lifted from tc184sc4's src/utils/asciidoc.ts.
+// Requires @asciidoctor/core v3.x (sync convert API). v4+ made
+// convert async; pin to ^3.0.4 for this synchronous wrapper.
 
-import * as AsciidoctorNS from '@asciidoctor/core'
+import Asciidoctor from '@asciidoctor/core'
 
-// @asciidoctor.core v3+ exposes the convert function directly on the
-// module namespace (no factory call needed).
-type ConvertFn = (input: string, opts: Record<string, unknown>) => unknown
+const asciidoctor = Asciidoctor()
 
 const BULLET_RE = /^[-•●▪▸▹‣⁃]\s*/
 const SUB_BULLET_RE = /^o\s+/
@@ -68,40 +67,9 @@ function preprocess(text: string): string {
 
 export function asciidocify(text: string): string {
   if (!text) return ''
-  // The asciidoctor module shape varies wildly across bundler/ctx:
-  //   - ESM direct: ns.convert exists
-  //   - CJS interop: ns.default may be the function or have .convert
-  //   - Vite browser bundle: ns.default has all exports
-  // Walk the shape and find a `convert` function.
-  const ns = AsciidoctorNS as unknown as {
-    convert?: ConvertFn
-    default?: unknown
-  }
-
-  function findConvert(obj: unknown, depth = 0): ConvertFn | undefined {
-    if (depth > 3) return undefined
-    if (typeof obj === 'function') return obj as ConvertFn
-    if (obj && typeof obj === 'object') {
-      const o = obj as { convert?: ConvertFn; default?: unknown }
-      if (typeof o.convert === 'function') return o.convert
-      if ('default' in o) {
-        const nested = findConvert(o.default, depth + 1)
-        if (nested) return nested
-      }
-    }
-    return undefined
-  }
-
-  const convertFn = findConvert(ns) ?? (typeof ns.convert === 'function' ? ns.convert : undefined)
-  if (!convertFn) {
-    throw new Error(
-      "@asciidoctor/core peer dep missing or incompatible shape. " +
-        `Top-level keys: ${Object.keys(AsciidoctorNS).slice(0, 10).join(', ')}`,
-    )
-  }
   const preprocessed = preprocess(text)
   return String(
-    convertFn(preprocessed, {
+    asciidoctor.convert(preprocessed, {
       standalone: false,
       safe: 'safe',
       attributes: { showtitle: false },

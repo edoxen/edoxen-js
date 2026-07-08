@@ -70,7 +70,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@asciidoctor/core": "^4.0.2",
+    "@asciidoctor/core": "^3.0.4",
     "esbuild": "^0.28.1"
   }
 }
