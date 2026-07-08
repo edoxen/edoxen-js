@@ -28,7 +28,8 @@ export function useLocalizedRoute<T extends string>(
     const l = lang.value
     const trimmed = path.replace(/^\/+/, '')
     const mapped = routeMap?.[l]?.[trimmed] ?? trimmed
-    const segs = [base, l, mapped].filter((s) => s !== '' && s != null)
+    const cleanBase = base.replace(/^\/+/, '')
+    const segs = [cleanBase, l, mapped].filter((s) => s !== '' && s != null)
     return '/' + segs.join('/')
   }
 
