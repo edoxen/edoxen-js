@@ -15,10 +15,11 @@ on:
 #   * id-token: write at workflow level (already)
 #   * NO NODE_AUTH_TOKEN env (suppresses OIDC)
 #   * actions/setup-node@v5 (not v6 — v6 has OIDC issues)
-#   * node-version 24
+#   * node-version 24 (bundled npm is recent enough — do NOT upgrade
+#     npm globally; the upgrade corrupts sigstore resolution and
+#     publish fails with MODULE_NOT_FOUND)
 #   * NO registry-url on setup-node (writes empty _authToken in .npmrc
 #     which prevents OIDC fallback)
-#   * npm install -g npm@latest before publish
 #   * npm publish --provenance (not pnpm publish)
 #   * NO --access flag: each package has publishConfig.access = public
 permissions:
@@ -38,7 +39,6 @@ jobs:
           node-version: '24'
           cache: pnpm
 
-      - run: npm install -g npm@latest
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r --filter='./packages/*' build
       - run: pnpm -r test
