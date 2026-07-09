@@ -10,11 +10,9 @@ on:
         required: false
         default: 'all'
 
-# Trusted publishing via npm provenance. Trusted publisher on npmjs.com
-# must point at edoxen/edoxen-js + .github/workflows/release.yml, no
-# environment. `npm publish --provenance` (NOT pnpm publish) triggers
-# the OIDC exchange; the empty NODE_AUTH_TOKEN pattern with pnpm
-# suppresses OIDC and fails with ENEEDAUTH / E404.
+# Trusted publishing via npm provenance — mirrors the verified-working
+# setup at glossarist/concept-browser. The npm CLI must be on the latest
+# version for the OIDC -> publish-token exchange to work reliably.
 permissions:
   contents: read
   id-token: write
@@ -23,16 +21,17 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: '24'
           cache: pnpm
           registry-url: 'https://registry.npmjs.org'
 
+      - run: npm install -g npm@latest
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r --filter='./packages/*' build
       - run: pnpm -r test
@@ -40,12 +39,12 @@ jobs:
       - name: Publish @edoxen/edoxen
         if: inputs.packages == 'all' || contains(inputs.packages, '@edoxen/edoxen')
         working-directory: packages/edoxen
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public --tag latest
       - name: Publish @edoxen/vue
         if: inputs.packages == 'all' || contains(inputs.packages, '@edoxen/vue')
         working-directory: packages/vue
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public --tag latest
       - name: Publish @edoxen/astro
         if: inputs.packages == 'all' || contains(inputs.packages, '@edoxen/astro')
         working-directory: packages/astro
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public --tag latest
