@@ -20,6 +20,7 @@ on:
 #     which prevents OIDC fallback)
 #   * npm install -g npm@latest before publish
 #   * npm publish --provenance (not pnpm publish)
+#   * NO --access flag: each package has publishConfig.access = public
 permissions:
   contents: read
   id-token: write
@@ -28,7 +29,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
@@ -45,12 +46,12 @@ jobs:
       - name: Publish @edoxen/edoxen
         if: inputs.packages == 'all' || contains(inputs.packages, '@edoxen/edoxen')
         working-directory: packages/edoxen
-        run: npm publish --provenance --access public
+        run: npm publish --provenance
       - name: Publish @edoxen/vue
         if: inputs.packages == 'all' || contains(inputs.packages, '@edoxen/vue')
-        working-directory: packages/vue
-        run: npm publish --provenance --access public
+        working-directory: packages/edoxen-vue
+        run: npm publish --provenance
       - name: Publish @edoxen/astro
         if: inputs.packages == 'all' || contains(inputs.packages, '@edoxen/astro')
-        working-directory: packages/astro
-        run: npm publish --provenance --access public
+        working-directory: packages/edoxen-astro
+        run: npm publish --provenance
