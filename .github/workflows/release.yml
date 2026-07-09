@@ -10,9 +10,16 @@ on:
         required: false
         default: 'all'
 
-# Trusted publishing via npm provenance — mirrors the verified-working
-# setup at glossarist/concept-browser. The npm CLI must be on the latest
-# version for the OIDC -> publish-token exchange to work reliably.
+# Trusted publishing via npm provenance. Combination that actually works
+# for this package (mirrors edoxen-js PR #33 + #35 lessons):
+#   * id-token: write at workflow level (already)
+#   * NO NODE_AUTH_TOKEN env (suppresses OIDC)
+#   * actions/setup-node@v5 (not v6 — v6 has OIDC issues)
+#   * node-version 24
+#   * NO registry-url on setup-node (writes empty _authToken in .npmrc
+#     which prevents OIDC fallback)
+#   * npm install -g npm@latest before publish
+#   * npm publish --provenance (not pnpm publish)
 permissions:
   contents: read
   id-token: write
@@ -21,15 +28,14 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v5
         with:
           node-version: '24'
           cache: pnpm
-          registry-url: 'https://registry.npmjs.org'
 
       - run: npm install -g npm@latest
       - run: pnpm install --frozen-lockfile
@@ -39,12 +45,12 @@ jobs:
       - name: Publish @edoxen/edoxen
         if: inputs.packages == 'all' || contains(inputs.packages, '@edoxen/edoxen')
         working-directory: packages/edoxen
-        run: npm publish --provenance --access public --tag latest
+        run: npm publish --provenance --access public
       - name: Publish @edoxen/vue
         if: inputs.packages == 'all' || contains(inputs.packages, '@edoxen/vue')
         working-directory: packages/vue
-        run: npm publish --provenance --access public --tag latest
+        run: npm publish --provenance --access public
       - name: Publish @edoxen/astro
         if: inputs.packages == 'all' || contains(inputs.packages, '@edoxen/astro')
         working-directory: packages/astro
-        run: npm publish --provenance --access public --tag latest
+        run: npm publish --provenance --access public
