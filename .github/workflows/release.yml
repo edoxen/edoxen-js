@@ -10,9 +10,10 @@ on:
         required: false
         default: 'all'
 
-# Trusted publishing via npm provenance — requires `id-token: write` and
-# the trusted publisher to be configured on npmjs.com for each package
-# pointing at this workflow file. No NPM_TOKEN needed once configured.
+# Trusted publishing via npm provenance — `id-token: write` lets GitHub
+# issue an OIDC token that npm exchanges for a short-lived publish token.
+# The trusted publisher on npmjs.com must point at edoxen/edoxen-js +
+# .github/workflows/release.yml, no environment.
 permissions:
   contents: read
   id-token: write
@@ -29,7 +30,10 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          registry-url: 'https://registry.npmjs.org'
+          # NOTE: `registry-url` deliberately omitted. With it,
+          # actions/setup-node writes .npmrc with an empty _authToken
+          # when NODE_AUTH_TOKEN is unset, which suppresses the OIDC
+          # flow npm needs for trusted publishing.
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r --filter='./packages/*' build
