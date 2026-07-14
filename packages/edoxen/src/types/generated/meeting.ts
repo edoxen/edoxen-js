@@ -104,6 +104,19 @@ export type AgendaItemOutcome =
  */
 export type TopicStatus = 'open' | 'under_discussion' | 'decided' | 'deferred' | 'withdrawn'
 /**
+ * Discriminator for the three BS 0:2006 statement types. Adding a
+ * new kind is a one-line enum extension; the Statement model
+ * itself never needs to change (OCP).
+ *
+ */
+export type StatementKind = 'statement' | 'comment' | 'standpoint'
+/**
+ * Discriminator for the two BS 0:2006 declaration types
+ * (conflict of interest, IPR).
+ *
+ */
+export type DeclarationKind = 'conflict_of_interest' | 'ipr'
+/**
  * Edoxen::Enums::COMPONENT_KIND.
  */
 export type ComponentKind =
@@ -166,7 +179,7 @@ export interface MeetingCollection {
   meetings: Meeting[]
 }
 /**
- * Display-level metadata for a MeetingCollection. v3.0: per-field Localized.
+ * Display-level metadata for a MeetingCollection. 1.0: per-field Localized.
  */
 export interface MeetingCollectionMetadata {
   title?: LocalizedString[]
@@ -188,7 +201,7 @@ export interface LocalizedString {
 /**
  * Profile-specific extension. Adopters register their namespace via
  * `profile` and discriminate via `kind`. Field semantics tightened
- * v2.1 (TODO.refactor/47): `kind` is the in-profile discriminator,
+ * 1.0 (TODO.refactor/1.0-design): `kind` is the in-profile discriminator,
  * `ref` is the URN of an external profile document, and the
  * recursive `extensions[]` slot was removed (YAGNI — use dotted
  * keys in `attributes[]` for nesting).
@@ -203,7 +216,7 @@ export interface MeetingExtension {
 /**
  * One typed key/value pair within a MeetingExtension. Polymorphic on
  * value type so consumers don't re-parse strings back into Int/Float/
- * Bool/Date (v2.1 tighten, TODO.refactor/47).
+ * Bool/Date (1.0 tighten, TODO.refactor/1.0-design).
  *
  */
 export interface ExtensionAttribute {
@@ -228,7 +241,7 @@ export interface BodyVocabularyEntry {
   definition?: string
 }
 /**
- * A single Meeting (event). v3.0: per-field Localized.
+ * A single Meeting (event). 1.0: per-field Localized.
  */
 export interface Meeting {
   /**
@@ -243,7 +256,8 @@ export interface Meeting {
   visibility?: Visibility
   body_type?: string
   title?: LocalizedString[]
-  date_range?: DateRange
+  scheduled_date_range?: DateRange
+  occurred_date_range?: DateTimeRange
   recurrence?: Recurrence
   venues?: Venue[]
   general_area?: LocalizedString[]
@@ -264,6 +278,7 @@ export interface Meeting {
   deadlines?: Deadline[]
   attendance?: Attendance[]
   minutes?: Minutes[]
+  declarations?: Declaration[]
   decisions?: StructuredIdentifier[]
   motions?: StructuredIdentifier[]
   votings?: StructuredIdentifier[]
@@ -281,6 +296,16 @@ export interface StructuredIdentifier {
  * Start + end date pair for multi-day meetings.
  */
 export interface DateRange {
+  start?: string
+  end?: string
+}
+/**
+ * Start + end pair with sub-day precision. Parallel to DateRange;
+ * use when day granularity is insufficient (e.g. a meeting that
+ * ran 09:00–11:30).
+ *
+ */
+export interface DateTimeRange {
   start?: string
   end?: string
 }
@@ -314,7 +339,7 @@ export interface RecurrenceByDay {
 /**
  * Polymorphic place where a Meeting happens. `kind` discriminates
  * physical vs virtual; all fields from both subtypes live here as
- * optional siblings. v3.0: per-field Localized (name, label,
+ * optional siblings. 1.0: per-field Localized (name, label,
  * description, address, building, floor, room, access_notes).
  * Added `urn` (registry identity) and `ref` (reference-by-URN).
  *
@@ -444,7 +469,7 @@ export interface HostRef {
   contact?: Contact
 }
 /**
- * VCARD-like abstract contact. v3.0: per-field Localized
+ * VCARD-like abstract contact. 1.0: per-field Localized
  * (name, title, affiliation, address). Added `urn` (registry
  * identity) and `ref` (reference-by-URN).
  *
@@ -490,7 +515,7 @@ export interface Agenda {
   extensions?: MeetingExtension[]
 }
 /**
- * One entry on an Agenda. v3.0: per-field Localized.
+ * One entry on an Agenda. 1.0: per-field Localized.
  */
 export interface AgendaItem {
   label?: string
@@ -513,7 +538,7 @@ export interface Reference {
   title?: LocalizedString[]
 }
 /**
- * The subject of discussion at a Meeting. v3.0: per-field Localized.
+ * The subject of discussion at a Meeting. 1.0: per-field Localized.
  */
 export interface Topic {
   identifier?: string
@@ -527,10 +552,12 @@ export interface Topic {
   references?: Reference[]
   motions?: string[]
   decisions?: string[]
+  statements?: Statement[]
+  declarations?: Declaration[]
   extensions?: MeetingExtension[]
 }
 /**
- * Text-bearing document about a Topic. v3.0: per-field Localized.
+ * Text-bearing document about a Topic. 1.0: per-field Localized.
  */
 export interface TopicDocument {
   identifier?: string
@@ -546,7 +573,7 @@ export interface TopicDocument {
   extensions?: MeetingExtension[]
 }
 /**
- * Non-text resource about a Topic. v3.0: per-field Localized.
+ * Non-text resource about a Topic. 1.0: per-field Localized.
  */
 export interface TopicAsset {
   identifier?: string
@@ -557,7 +584,48 @@ export interface TopicAsset {
   extensions?: MeetingExtension[]
 }
 /**
- * Flat sub-event of a Meeting. v3.0: per-field Localized.
+ * One remark made by one or more meeting members on a topic or a
+ * minutes section. Per-field Localized description; party is a
+ * list of Person references. The `kind` discriminator separates
+ * the three BS 0:2006 statement types.
+ *
+ */
+export interface Statement {
+  kind?: StatementKind
+  description?: LocalizedString[]
+  party?: Person[]
+  extensions?: MeetingExtension[]
+}
+/**
+ * A formal declaration (conflict of interest or IPR) made by one
+ * or more meeting members. IPR-specific fields (`ipr_subject_ref`,
+ * `ipr_target_ref`) are populated only when `kind == "ipr"`.
+ *
+ */
+export interface Declaration {
+  kind?: DeclarationKind
+  description?: LocalizedString[]
+  party?: Person[]
+  ipr_subject_ref?: EntityRef
+  ipr_target_ref?: EntityRef
+  extensions?: MeetingExtension[]
+}
+/**
+ * Typed cross-reference between entities (1.0, TODO.refactor/1.0-design).
+ * Exactly one of `urn`, `identifier`, or `local_ref` should be set;
+ * the gem's `EntityRef#valid?` enforces this in Ruby.
+ *
+ */
+export interface EntityRef {
+  urn?: string
+  identifier?: StructuredIdentifier
+  local_ref?: string
+  kind?: string
+  role?: string
+  note?: string
+}
+/**
+ * Flat sub-event of a Meeting. 1.0: per-field Localized.
  */
 export interface MeetingComponent {
   identifier?: string
@@ -577,7 +645,7 @@ export interface MeetingComponent {
   extensions?: MeetingExtension[]
 }
 /**
- * A time-bound requirement. v3.0: per-field Localized.
+ * A time-bound requirement. 1.0: per-field Localized.
  */
 export interface Deadline {
   date: string
@@ -597,7 +665,7 @@ export interface Attendance {
   extensions?: MeetingExtension[]
 }
 /**
- * The narrative record of a Meeting. v3.0: per-document language_code
+ * The narrative record of a Meeting. 1.0: per-document language_code
  * + script replaced by a single `spelling` (ISO 24229).
  *
  */
@@ -613,7 +681,7 @@ export interface Minutes {
   sections?: MinutesSection[]
 }
 /**
- * One section of a Meeting's minutes — typically tied to an agenda item by `number`. v3.0: per-field Localized.
+ * One section of a Meeting's minutes — typically tied to an agenda item by `number`. 1.0: per-field Localized.
  */
 export interface MinutesSection {
   number?: string
@@ -622,6 +690,14 @@ export interface MinutesSection {
   page_start?: number
   page_end?: number
   references?: Reference[]
+  statements?: Statement[]
+  /**
+   * URN back-reference to the Topic this section records.
+   * Optional; formalises the convention that
+   * `MinutesSection#number` matches `AgendaItem#label`.
+   *
+   */
+  topic_ref?: string
 }
 /**
  * Directed link between two meetings.
@@ -632,7 +708,7 @@ export interface MeetingRelation {
   type: MeetingRelationType
 }
 /**
- * Parent of recurring Meeting instances. v3.0: per-field Localized.
+ * Parent of recurring Meeting instances. 1.0: per-field Localized.
  */
 export interface MeetingSeries {
   identifier?: StructuredIdentifier[]

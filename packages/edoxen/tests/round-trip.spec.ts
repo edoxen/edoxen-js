@@ -30,7 +30,14 @@ describe('round-trip gem fixtures', () => {
   })
 
   describe.skipIf(!haveGem)('decision fixtures', () => {
-    for (const file of yamlFiles(DECISIONS_DIR)) {
+    // `contacts.yaml` and `venues.yaml` are ContactCollection /
+    // VenueCollection fixtures (the canonical decision-collection.yaml
+    // oneOf accepts all three at the root). They have no `decisions[]`
+    // array, so the "loads as a DecisionCollection" assertion does not
+    // apply. They are validated by the gem's CLI smoke instead.
+    const SKIP = new Set(['contacts.yaml', 'venues.yaml'])
+    const decisionFiles = yamlFiles(DECISIONS_DIR).filter((f) => !SKIP.has(f))
+    for (const file of decisionFiles) {
       const fullPath = path.join(DECISIONS_DIR, file)
       describe(file, () => {
         it('loads as a DecisionCollection', async () => {
@@ -61,6 +68,7 @@ describe('round-trip gem fixtures', () => {
     for (const file of yamlFiles(MEETINGS_DIR)) {
       const fullPath = path.join(MEETINGS_DIR, file)
       const isSeries = /series/i.test(file)
+      const isBs0 = /bs0/i.test(file)
       describe(file, () => {
         it(isSeries ? 'loads as a MeetingSeries' : 'loads as a Meeting / MeetingCollection', async () => {
           const { meetings, series } = await loadMeetings(fullPath)
@@ -77,6 +85,17 @@ describe('round-trip gem fixtures', () => {
             expect(m.identifier, `${file}: missing identifier`).toBeDefined()
             expect(m.type, `${file}: missing type`).toBeTruthy()
           }
+        })
+
+        it.skipIf(!isBs0)('BS 0 fixture carries statements, declarations, and occurred_date_range', async () => {
+          const { meetings } = await loadMeetings(fullPath)
+          const m = meetings[0]
+          expect(m.declarations, `${file}: missing declarations`).toBeDefined()
+          expect(m.declarations.length).toBeGreaterThan(0)
+          expect(m.occurred_date_range, `${file}: missing occurred_date_range`).toBeDefined()
+          const section = m.minutes?.[0]?.sections?.[0]
+          expect(section?.statements, `${file}: missing MinutesSection.statements`).toBeDefined()
+          expect(section?.statements.length).toBeGreaterThan(0)
         })
       })
     }
