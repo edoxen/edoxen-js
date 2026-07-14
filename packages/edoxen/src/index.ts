@@ -99,6 +99,12 @@ export type {
   SourceUrl,
   MeetingExtension,
   ExtensionAttribute,
+  // BS 0:2006 §7.6 meeting-minutes concepts.
+  Statement,
+  StatementKind,
+  Declaration,
+  DeclarationKind,
+  DateTimeRange,
 } from './types/generated/meeting.js'
 
 export * from './load/index.js'

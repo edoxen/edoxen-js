@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/edoxen/edoxen/schema/meeting.yaml",
+  "$id": "https://github.com/edoxen/edoxen-model/schema/meeting.yaml",
   "title": "Edoxen Meeting Schema",
   "description": "Schema for validating Edoxen Meeting/Agenda YAML files.\n\nMirrors the canonical LutaML information model in\nhttps://github.com/edoxen/edoxen-model/tree/main/models (meeting*.lutaml,\nagenda*.lutaml, etc.).\n\nThe root accepts either a single Meeting or a MeetingCollection.\n\nEnum lists in this schema are kept in lockstep with\nEdoxen::Enums::* (Meeting side) by\n`spec/edoxen/schema_meeting_enum_sync_spec.rb`.\n",
   "type": "object",
@@ -35,7 +35,7 @@
     },
     "EntityRef": {
       "type": "object",
-      "description": "Typed cross-reference between entities (v2.1, TODO.refactor/44).\nExactly one of `urn`, `identifier`, or `local_ref` should be set;\nthe gem's `EntityRef#valid?` enforces this in Ruby.\n",
+      "description": "Typed cross-reference between entities (1.0, TODO.refactor/1.0-design).\nExactly one of `urn`, `identifier`, or `local_ref` should be set;\nthe gem's `EntityRef#valid?` enforces this in Ruby.\n",
       "additionalProperties": false,
       "properties": {
         "urn": {
@@ -247,7 +247,7 @@
     },
     "Contact": {
       "type": "object",
-      "description": "VCARD-like abstract contact. v3.0: per-field Localized\n(name, title, affiliation, address). Added `urn` (registry\nidentity) and `ref` (reference-by-URN).\n",
+      "description": "VCARD-like abstract contact. 1.0: per-field Localized\n(name, title, affiliation, address). Added `urn` (registry\nidentity) and `ref` (reference-by-URN).\n",
       "additionalProperties": false,
       "properties": {
         "ref": {
@@ -470,7 +470,7 @@
     },
     "MinutesSection": {
       "type": "object",
-      "description": "One section of a Meeting's minutes — typically tied to an agenda item by `number`. v3.0: per-field Localized.",
+      "description": "One section of a Meeting's minutes — typically tied to an agenda item by `number`. 1.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "number": {
@@ -499,12 +499,22 @@
           "items": {
             "$ref": "#/$defs/Reference"
           }
+        },
+        "statements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Statement"
+          }
+        },
+        "topic_ref": {
+          "type": "string",
+          "description": "URN back-reference to the Topic this section records.\nOptional; formalises the convention that\n`MinutesSection#number` matches `AgendaItem#label`.\n"
         }
       }
     },
     "Minutes": {
       "type": "object",
-      "description": "The narrative record of a Meeting. v3.0: per-document language_code\n+ script replaced by a single `spelling` (ISO 24229).\n",
+      "description": "The narrative record of a Meeting. 1.0: per-document language_code\n+ script replaced by a single `spelling` (ISO 24229).\n",
       "additionalProperties": false,
       "properties": {
         "identifier": {
@@ -536,7 +546,7 @@
     },
     "Deadline": {
       "type": "object",
-      "description": "A time-bound requirement. v3.0: per-field Localized.",
+      "description": "A time-bound requirement. 1.0: per-field Localized.",
       "additionalProperties": false,
       "required": [
         "date"
@@ -575,7 +585,7 @@
     },
     "AgendaItem": {
       "type": "object",
-      "description": "One entry on an Agenda. v3.0: per-field Localized.",
+      "description": "One entry on an Agenda. 1.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "label": {
@@ -661,7 +671,7 @@
     },
     "TopicDocument": {
       "type": "object",
-      "description": "Text-bearing document about a Topic. v3.0: per-field Localized.",
+      "description": "Text-bearing document about a Topic. 1.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "identifier": {
@@ -699,7 +709,7 @@
     },
     "TopicAsset": {
       "type": "object",
-      "description": "Non-text resource about a Topic. v3.0: per-field Localized.",
+      "description": "Non-text resource about a Topic. 1.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "identifier": {
@@ -730,7 +740,7 @@
     },
     "Topic": {
       "type": "object",
-      "description": "The subject of discussion at a Meeting. v3.0: per-field Localized.",
+      "description": "The subject of discussion at a Meeting. 1.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "identifier": {
@@ -787,6 +797,18 @@
             "type": "string"
           }
         },
+        "statements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Statement"
+          }
+        },
+        "declarations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Declaration"
+          }
+        },
         "extensions": {
           "type": "array",
           "items": {
@@ -797,7 +819,7 @@
     },
     "Venue": {
       "type": "object",
-      "description": "Polymorphic place where a Meeting happens. `kind` discriminates\nphysical vs virtual; all fields from both subtypes live here as\noptional siblings. v3.0: per-field Localized (name, label,\ndescription, address, building, floor, room, access_notes).\nAdded `urn` (registry identity) and `ref` (reference-by-URN).\n",
+      "description": "Polymorphic place where a Meeting happens. `kind` discriminates\nphysical vs virtual; all fields from both subtypes live here as\noptional siblings. 1.0: per-field Localized (name, label,\ndescription, address, building, floor, room, access_notes).\nAdded `urn` (registry identity) and `ref` (reference-by-URN).\n",
       "additionalProperties": false,
       "properties": {
         "ref": {
@@ -1025,7 +1047,7 @@
     },
     "ExtensionAttribute": {
       "type": "object",
-      "description": "One typed key/value pair within a MeetingExtension. Polymorphic on\nvalue type so consumers don't re-parse strings back into Int/Float/\nBool/Date (v2.1 tighten, TODO.refactor/47).\n",
+      "description": "One typed key/value pair within a MeetingExtension. Polymorphic on\nvalue type so consumers don't re-parse strings back into Int/Float/\nBool/Date (1.0 tighten, TODO.refactor/1.0-design).\n",
       "additionalProperties": false,
       "properties": {
         "key": {
@@ -1066,7 +1088,7 @@
     },
     "MeetingExtension": {
       "type": "object",
-      "description": "Profile-specific extension. Adopters register their namespace via\n`profile` and discriminate via `kind`. Field semantics tightened\nv2.1 (TODO.refactor/47): `kind` is the in-profile discriminator,\n`ref` is the URN of an external profile document, and the\nrecursive `extensions[]` slot was removed (YAGNI — use dotted\nkeys in `attributes[]` for nesting).\n",
+      "description": "Profile-specific extension. Adopters register their namespace via\n`profile` and discriminate via `kind`. Field semantics tightened\n1.0 (TODO.refactor/1.0-design): `kind` is the in-profile discriminator,\n`ref` is the URN of an external profile document, and the\nrecursive `extensions[]` slot was removed (YAGNI — use dotted\nkeys in `attributes[]` for nesting).\n",
       "additionalProperties": false,
       "properties": {
         "profile": {
@@ -1115,7 +1137,7 @@
     },
     "MeetingComponent": {
       "type": "object",
-      "description": "Flat sub-event of a Meeting. v3.0: per-field Localized.",
+      "description": "Flat sub-event of a Meeting. 1.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "identifier": {
@@ -1190,7 +1212,7 @@
     },
     "MeetingSeries": {
       "type": "object",
-      "description": "Parent of recurring Meeting instances. v3.0: per-field Localized.",
+      "description": "Parent of recurring Meeting instances. 1.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "identifier": {
@@ -1272,7 +1294,7 @@
     },
     "Meeting": {
       "type": "object",
-      "description": "A single Meeting (event). v3.0: per-field Localized.",
+      "description": "A single Meeting (event). 1.0: per-field Localized.",
       "additionalProperties": false,
       "required": [
         "identifier",
@@ -1313,8 +1335,11 @@
             "$ref": "#/$defs/LocalizedString"
           }
         },
-        "date_range": {
+        "scheduled_date_range": {
           "$ref": "#/$defs/DateRange"
+        },
+        "occurred_date_range": {
+          "$ref": "#/$defs/DateTimeRange"
         },
         "recurrence": {
           "$ref": "#/$defs/Recurrence"
@@ -1411,6 +1436,12 @@
             "$ref": "#/$defs/Minutes"
           }
         },
+        "declarations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Declaration"
+          }
+        },
         "decisions": {
           "type": "array",
           "items": {
@@ -1445,7 +1476,7 @@
     },
     "MeetingCollectionMetadata": {
       "type": "object",
-      "description": "Display-level metadata for a MeetingCollection. v3.0: per-field Localized.",
+      "description": "Display-level metadata for a MeetingCollection. 1.0: per-field Localized.",
       "additionalProperties": false,
       "properties": {
         "title": {
@@ -1525,7 +1556,7 @@
     },
     "MeetingTypeCanonical": {
       "type": "string",
-      "description": "Edoxen::Enums::MEETING_TYPE_CANONICAL — short abstract set (v2.1,\nTODO.refactor/46). No `other` escape — bodies pick the closest\nfit and use `body_type` for body-specific terminology.\n",
+      "description": "Edoxen::Enums::MEETING_TYPE_CANONICAL — short abstract set (1.0,\nTODO.refactor/1.0-design). No `other` escape — bodies pick the closest\nfit and use `body_type` for body-specific terminology.\n",
       "enum": [
         "plenary",
         "governing",
@@ -1756,6 +1787,100 @@
         "monthly",
         "yearly"
       ]
+    },
+    "DateTimeRange": {
+      "type": "object",
+      "description": "Start + end pair with sub-day precision. Parallel to DateRange;\nuse when day granularity is insufficient (e.g. a meeting that\nran 09:00–11:30).\n",
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "StatementKind": {
+      "type": "string",
+      "description": "Discriminator for the three BS 0:2006 statement types. Adding a\nnew kind is a one-line enum extension; the Statement model\nitself never needs to change (OCP).\n",
+      "enum": [
+        "statement",
+        "comment",
+        "standpoint"
+      ]
+    },
+    "DeclarationKind": {
+      "type": "string",
+      "description": "Discriminator for the two BS 0:2006 declaration types\n(conflict of interest, IPR).\n",
+      "enum": [
+        "conflict_of_interest",
+        "ipr"
+      ]
+    },
+    "Statement": {
+      "type": "object",
+      "description": "One remark made by one or more meeting members on a topic or a\nminutes section. Per-field Localized description; party is a\nlist of Person references. The `kind` discriminator separates\nthe three BS 0:2006 statement types.\n",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/StatementKind"
+        },
+        "description": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
+        },
+        "party": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Person"
+          }
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MeetingExtension"
+          }
+        }
+      }
+    },
+    "Declaration": {
+      "type": "object",
+      "description": "A formal declaration (conflict of interest or IPR) made by one\nor more meeting members. IPR-specific fields (`ipr_subject_ref`,\n`ipr_target_ref`) are populated only when `kind == \"ipr\"`.\n",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/DeclarationKind"
+        },
+        "description": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
+        },
+        "party": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Person"
+          }
+        },
+        "ipr_subject_ref": {
+          "$ref": "#/$defs/EntityRef"
+        },
+        "ipr_target_ref": {
+          "$ref": "#/$defs/EntityRef"
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MeetingExtension"
+          }
+        }
+      }
     }
   }
 }
