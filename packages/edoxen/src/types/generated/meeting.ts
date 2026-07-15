@@ -264,8 +264,8 @@ export interface Meeting {
   practical_info?: LocalizedString[]
   city?: string
   country_code?: string
-  committee?: string
-  committee_group?: string
+  committee?: Body
+  committee_group?: Body
   officers?: Officer[]
   hosts?: HostRef[]
   source_urls?: SourceUrl[]
@@ -273,6 +273,8 @@ export interface Meeting {
   registration_url?: string
   note?: LocalizedString[]
   contact?: Contact
+  contacts?: Contact[]
+  bodies?: Body[]
   agenda?: Agenda
   components?: MeetingComponent[]
   deadlines?: Deadline[]
@@ -345,10 +347,8 @@ export interface RecurrenceByDay {
  *
  */
 export interface Venue {
-  /**
-   * URN reference; if set, ignore other fields
-   */
   ref?: string
+  local_ref?: string
   urn?: string
   kind?: VenueKind
   name?: LocalizedString[]
@@ -393,6 +393,34 @@ export interface ContactMethod {
   extensions?: MeetingExtension[]
 }
 /**
+ * A committee, subcommittee, working group, or other organised body.
+ * Three-tier entity resolution (ref / local_ref / inline).
+ *
+ */
+export interface Body {
+  ref?: string
+  local_ref?: string
+  code?: string
+  name?: LocalizedString[]
+  kind?: string
+  parent_ref?: EntityRef
+  extensions?: MeetingExtension[]
+}
+/**
+ * Typed cross-reference between entities (1.0, TODO.refactor/1.0-design).
+ * Exactly one of `urn`, `identifier`, or `local_ref` should be set;
+ * the gem's `EntityRef#valid?` enforces this in Ruby.
+ *
+ */
+export interface EntityRef {
+  urn?: string
+  identifier?: StructuredIdentifier
+  local_ref?: string
+  kind?: string
+  role?: string
+  note?: string
+}
+/**
  * A person holding a structural role in a Meeting.
  */
 export interface Officer {
@@ -410,6 +438,7 @@ export interface Officer {
  */
 export interface Person {
   ref?: string
+  local_ref?: string
   urn?: string
   name?: LocalizedName[]
   kind?: string
@@ -475,10 +504,8 @@ export interface HostRef {
  *
  */
 export interface Contact {
-  /**
-   * URN reference; if set, ignore other fields
-   */
   ref?: string
+  local_ref?: string
   urn?: string
   name?: LocalizedName[]
   kind?: string
@@ -609,20 +636,6 @@ export interface Declaration {
   ipr_subject_ref?: EntityRef
   ipr_target_ref?: EntityRef
   extensions?: MeetingExtension[]
-}
-/**
- * Typed cross-reference between entities (1.0, TODO.refactor/1.0-design).
- * Exactly one of `urn`, `identifier`, or `local_ref` should be set;
- * the gem's `EntityRef#valid?` enforces this in Ruby.
- *
- */
-export interface EntityRef {
-  urn?: string
-  identifier?: StructuredIdentifier
-  local_ref?: string
-  kind?: string
-  role?: string
-  note?: string
 }
 /**
  * Flat sub-event of a Meeting. 1.0: per-field Localized.
