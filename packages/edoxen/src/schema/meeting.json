@@ -251,8 +251,10 @@
       "additionalProperties": false,
       "properties": {
         "ref": {
-          "type": "string",
-          "description": "URN reference; if set, ignore other fields"
+          "type": "string"
+        },
+        "local_ref": {
+          "type": "string"
         },
         "urn": {
           "type": "string",
@@ -314,6 +316,9 @@
       "additionalProperties": false,
       "properties": {
         "ref": {
+          "type": "string"
+        },
+        "local_ref": {
           "type": "string"
         },
         "urn": {
@@ -823,8 +828,10 @@
       "additionalProperties": false,
       "properties": {
         "ref": {
-          "type": "string",
-          "description": "URN reference; if set, ignore other fields"
+          "type": "string"
+        },
+        "local_ref": {
+          "type": "string"
         },
         "urn": {
           "type": "string",
@@ -1371,10 +1378,10 @@
           "pattern": "^[A-Z]{2}$"
         },
         "committee": {
-          "type": "string"
+          "$ref": "#/$defs/Body"
         },
         "committee_group": {
-          "type": "string"
+          "$ref": "#/$defs/Body"
         },
         "officers": {
           "type": "array",
@@ -1408,6 +1415,18 @@
         },
         "contact": {
           "$ref": "#/$defs/Contact"
+        },
+        "contacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Contact"
+          }
+        },
+        "bodies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Body"
+          }
         },
         "agenda": {
           "$ref": "#/$defs/Agenda"
@@ -1873,6 +1892,68 @@
         },
         "ipr_target_ref": {
           "$ref": "#/$defs/EntityRef"
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MeetingExtension"
+          }
+        }
+      }
+    },
+    "Body": {
+      "type": "object",
+      "description": "A committee, subcommittee, working group, or other organised body.\nThree-tier entity resolution (ref / local_ref / inline).\n",
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string"
+        },
+        "local_ref": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
+        },
+        "kind": {
+          "type": "string"
+        },
+        "parent_ref": {
+          "$ref": "#/$defs/EntityRef"
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MeetingExtension"
+          }
+        }
+      }
+    },
+    "BodyRegister": {
+      "type": "object",
+      "description": "Authoritative register of Bodies (committees, subcommittees,\nworking groups).\n",
+      "additionalProperties": false,
+      "properties": {
+        "scope": {
+          "type": "string"
+        },
+        "title": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
+        },
+        "bodies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Body"
+          }
         },
         "extensions": {
           "type": "array",

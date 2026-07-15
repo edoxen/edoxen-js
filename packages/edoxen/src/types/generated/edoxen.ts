@@ -6,8 +6,8 @@
  * Accepts three top-level document kinds via `oneOf`:
  *
  *   * `DecisionCollection` — the formal outcomes adopted by a Meeting.
- *   * `ContactCollection` — a scoped-URN registry of Contacts.
- *   * `VenueCollection`  — a scoped-URN registry of Venues.
+ *   * `ContactRegister` — a scoped-URN registry of Contacts.
+ *   * `VenueRegister`  — a scoped-URN registry of Venues.
  *
  * Mirrors the canonical LutaML information model in
  * https://github.com/edoxen/edoxen-model/tree/main/models .
@@ -23,7 +23,7 @@
  * is documented in `Edoxen::SchemaValidator#format_message`.
  *
  */
-export type EdoxenDecisionCollectionSchema = DecisionCollection | ContactCollection | VenueCollection
+export type EdoxenDecisionCollectionSchema = DecisionCollection | ContactRegister | VenueRegister | BodyRegister
 /**
  * Edoxen::Enums::SOURCE_URL_KIND.
  */
@@ -285,7 +285,7 @@ export interface Action {
  * `scope` MUST match the scope segment in member URNs.
  *
  */
-export interface ContactCollection {
+export interface ContactRegister {
   scope?: string
   title?: LocalizedString[]
   contacts?: Contact[]
@@ -298,10 +298,8 @@ export interface ContactCollection {
  *
  */
 export interface Contact {
-  /**
-   * URN reference; if set, ignore other fields
-   */
   ref?: string
+  local_ref?: string
   urn?: string
   name?: LocalizedName[]
   kind?: string
@@ -367,10 +365,10 @@ export interface ContactIdentifier {
   extensions?: MeetingExtension[]
 }
 /**
- * Registry of Venues indexed by scoped URN. Mirrors ContactCollection.
+ * Registry of Venues indexed by scoped URN. Mirrors ContactRegister.
  *
  */
-export interface VenueCollection {
+export interface VenueRegister {
   scope?: string
   title?: LocalizedString[]
   venues?: Venue[]
@@ -385,10 +383,8 @@ export interface VenueCollection {
  *
  */
 export interface Venue {
-  /**
-   * URN reference; if set, ignore other fields
-   */
   ref?: string
+  local_ref?: string
   urn?: string
   kind?: VenueKind
   name?: LocalizedString[]
@@ -416,4 +412,43 @@ export interface Venue {
   waiting_room?: boolean
   registration_required?: boolean
   extensions?: MeetingExtension[]
+}
+/**
+ * Authoritative register of Bodies (committees, subcommittees,
+ * working groups).
+ *
+ */
+export interface BodyRegister {
+  scope?: string
+  title?: LocalizedString[]
+  bodies?: Body[]
+  extensions?: MeetingExtension[]
+}
+/**
+ * A committee, subcommittee, working group, or other organised body.
+ * Three-tier entity resolution (ref / local_ref / inline).
+ *
+ */
+export interface Body {
+  ref?: string
+  local_ref?: string
+  code?: string
+  name?: LocalizedString[]
+  kind?: string
+  parent_ref?: EntityRef
+  extensions?: MeetingExtension[]
+}
+/**
+ * Typed cross-reference between entities (1.0, TODO.refactor/1.0-design).
+ * Exactly one of `urn`, `identifier`, or `local_ref` should be set;
+ * the gem's `EntityRef#valid?` enforces this in Ruby.
+ *
+ */
+export interface EntityRef {
+  urn?: string
+  identifier?: StructuredIdentifier
+  local_ref?: string
+  kind?: string
+  role?: string
+  note?: string
 }

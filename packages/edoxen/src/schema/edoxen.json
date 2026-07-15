@@ -2,17 +2,20 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/edoxen/edoxen-model/schema/decision-collection.yaml",
   "title": "Edoxen Decision Collection Schema",
-  "description": "Schema for validating Edoxen decision-side YAML files.\n\nAccepts three top-level document kinds via `oneOf`:\n\n  * `DecisionCollection` — the formal outcomes adopted by a Meeting.\n  * `ContactCollection` — a scoped-URN registry of Contacts.\n  * `VenueCollection`  — a scoped-URN registry of Venues.\n\nMirrors the canonical LutaML information model in\nhttps://github.com/edoxen/edoxen-model/tree/main/models .\n\nThe enum constants declared under `$defs` are the authoritative wire\nvalues. `spec/edoxen/schema_enum_sync_spec.rb` asserts each one is\ncharacter-for-character identical to the corresponding `Edoxen::Enums::*`\nfrozen array.\n\nTrade-off: json_schemer's `valid_values` is not populated when an\n`enum` is reached via `$ref`, so the validator's enum-violation\nmessage degrades to \"value ... is not one of: (see schema)\". This\nis documented in `Edoxen::SchemaValidator#format_message`.\n",
+  "description": "Schema for validating Edoxen decision-side YAML files.\n\nAccepts three top-level document kinds via `oneOf`:\n\n  * `DecisionCollection` — the formal outcomes adopted by a Meeting.\n  * `ContactRegister` — a scoped-URN registry of Contacts.\n  * `VenueRegister`  — a scoped-URN registry of Venues.\n\nMirrors the canonical LutaML information model in\nhttps://github.com/edoxen/edoxen-model/tree/main/models .\n\nThe enum constants declared under `$defs` are the authoritative wire\nvalues. `spec/edoxen/schema_enum_sync_spec.rb` asserts each one is\ncharacter-for-character identical to the corresponding `Edoxen::Enums::*`\nfrozen array.\n\nTrade-off: json_schemer's `valid_values` is not populated when an\n`enum` is reached via `$ref`, so the validator's enum-violation\nmessage degrades to \"value ... is not one of: (see schema)\". This\nis documented in `Edoxen::SchemaValidator#format_message`.\n",
   "type": "object",
   "oneOf": [
     {
       "$ref": "#/$defs/DecisionCollection"
     },
     {
-      "$ref": "#/$defs/ContactCollection"
+      "$ref": "#/$defs/ContactRegister"
     },
     {
-      "$ref": "#/$defs/VenueCollection"
+      "$ref": "#/$defs/VenueRegister"
+    },
+    {
+      "$ref": "#/$defs/BodyRegister"
     }
   ],
   "$defs": {
@@ -767,8 +770,10 @@
       "additionalProperties": false,
       "properties": {
         "ref": {
-          "type": "string",
-          "description": "URN reference; if set, ignore other fields"
+          "type": "string"
+        },
+        "local_ref": {
+          "type": "string"
         },
         "urn": {
           "type": "string",
@@ -1177,8 +1182,10 @@
       "additionalProperties": false,
       "properties": {
         "ref": {
-          "type": "string",
-          "description": "URN reference; if set, ignore other fields"
+          "type": "string"
+        },
+        "local_ref": {
+          "type": "string"
         },
         "urn": {
           "type": "string",
@@ -1240,6 +1247,9 @@
       "additionalProperties": false,
       "properties": {
         "ref": {
+          "type": "string"
+        },
+        "local_ref": {
           "type": "string"
         },
         "urn": {
@@ -1538,7 +1548,7 @@
         }
       }
     },
-    "ContactCollection": {
+    "ContactRegister": {
       "type": "object",
       "description": "Registry of Contacts indexed by scoped URN. Members carry\n`urn: urn:edoxen:contact:{scope}:{local-id}`; the collection's\n`scope` MUST match the scope segment in member URNs.\n",
       "additionalProperties": false,
@@ -1566,9 +1576,9 @@
         }
       }
     },
-    "VenueCollection": {
+    "VenueRegister": {
       "type": "object",
-      "description": "Registry of Venues indexed by scoped URN. Mirrors ContactCollection.\n",
+      "description": "Registry of Venues indexed by scoped URN. Mirrors ContactRegister.\n",
       "additionalProperties": false,
       "properties": {
         "scope": {
@@ -1987,6 +1997,68 @@
         },
         "ipr_target_ref": {
           "$ref": "#/$defs/EntityRef"
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MeetingExtension"
+          }
+        }
+      }
+    },
+    "Body": {
+      "type": "object",
+      "description": "A committee, subcommittee, working group, or other organised body.\nThree-tier entity resolution (ref / local_ref / inline).\n",
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string"
+        },
+        "local_ref": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
+        },
+        "kind": {
+          "type": "string"
+        },
+        "parent_ref": {
+          "$ref": "#/$defs/EntityRef"
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MeetingExtension"
+          }
+        }
+      }
+    },
+    "BodyRegister": {
+      "type": "object",
+      "description": "Authoritative register of Bodies (committees, subcommittees,\nworking groups).\n",
+      "additionalProperties": false,
+      "properties": {
+        "scope": {
+          "type": "string"
+        },
+        "title": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalizedString"
+          }
+        },
+        "bodies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Body"
+          }
         },
         "extensions": {
           "type": "array",
