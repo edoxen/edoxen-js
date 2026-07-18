@@ -16,11 +16,13 @@ const __dirname = path.dirname(__filename)
 
 const PKG_DIST = path.resolve(__dirname, '../packages/edoxen/dist')
 
+// Chunk hashes drift on every build — match by prefix, never by
+// exact hashed filename, or the check silently stops applying.
 const BUDGETS = [
   { file: 'index.js', maxKb: 25 },
-  { file: 'edoxen-Ch_1Fxq0.js', maxKb: 10 },
-  { file: 'meeting-CZ7-CmHm.js', maxKb: 10 },
-  { file: 'flexsearch-CKLS7Zld.js', maxKb: 2 },
+  { match: /^edoxen-.+\.js$/, maxKb: 10 },
+  { match: /^meeting-.+\.js$/, maxKb: 10 },
+  { match: /^flexsearch-.+\.js$/, maxKb: 2 },
 ]
 
 if (!fs.existsSync(PKG_DIST)) {
@@ -28,20 +30,26 @@ if (!fs.existsSync(PKG_DIST)) {
   process.exit(2)
 }
 
+const distFiles = fs.readdirSync(PKG_DIST)
+const targets = BUDGETS.flatMap((b) => {
+  if (b.file) return [{ name: b.file, maxKb: b.maxKb }]
+  const hits = distFiles.filter((f) => b.match.test(f))
+  if (hits.length === 0) {
+    console.warn(`  ? ${b.match} — no matching chunk built (will check next time)`)
+  }
+  return hits.map((name) => ({ name, maxKb: b.maxKb }))
+})
+
 let failed = false
 console.log('bundle size budget check:')
-for (const { file, maxKb } of BUDGETS) {
-  const fullPath = path.join(PKG_DIST, file)
-  if (!fs.existsSync(fullPath)) {
-    console.warn(`  ? ${file} — not built (will check next time)`)
-    continue
-  }
+for (const { name, maxKb } of targets) {
+  const fullPath = path.join(PKG_DIST, name)
   const raw = fs.readFileSync(fullPath)
   const gz = zlib.gzipSync(raw)
   const sizeKb = gz.length / 1024
   const pct = ((sizeKb / maxKb) * 100).toFixed(0)
   const status = sizeKb <= maxKb ? '✓' : '✗'
-  console.log(`  ${status} ${file}: ${sizeKb.toFixed(2)} KB / ${maxKb} KB (${pct}%)`)
+  console.log(`  ${status} ${name}: ${sizeKb.toFixed(2)} KB / ${maxKb} KB (${pct}%)`)
   if (sizeKb > maxKb) failed = true
 }
 
