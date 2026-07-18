@@ -543,8 +543,19 @@ export interface Agenda {
 }
 /**
  * One entry on an Agenda. 1.0: per-field Localized.
+ * `urn` is the first-class URN of this item, derived from the
+ * parent meeting URN and label (e.g.
+ * `urn:oiml:ciml:meeting:ciml-60:agenda:6.2`). Optional in source
+ * data; can be computed via `Edoxen::UrnFor.agenda_item`.
+ *
  */
 export interface AgendaItem {
+  /**
+   * First-class URN for this agenda item. Hierarchical under the
+   * parent meeting URN: `urn:oiml:{body}:meeting:{slug}:agenda:{label}`.
+   *
+   */
+  urn?: string
   label?: string
   kind?: AgendaItemKind
   title?: LocalizedString[]

@@ -590,9 +590,13 @@
     },
     "AgendaItem": {
       "type": "object",
-      "description": "One entry on an Agenda. 1.0: per-field Localized.",
+      "description": "One entry on an Agenda. 1.0: per-field Localized.\n`urn` is the first-class URN of this item, derived from the\nparent meeting URN and label (e.g.\n`urn:oiml:ciml:meeting:ciml-60:agenda:6.2`). Optional in source\ndata; can be computed via `Edoxen::UrnFor.agenda_item`.\n",
       "additionalProperties": false,
       "properties": {
+        "urn": {
+          "type": "string",
+          "description": "First-class URN for this agenda item. Hierarchical under the\nparent meeting URN: `urn:oiml:{body}:meeting:{slug}:agenda:{label}`.\n"
+        },
         "label": {
           "type": "string"
         },
