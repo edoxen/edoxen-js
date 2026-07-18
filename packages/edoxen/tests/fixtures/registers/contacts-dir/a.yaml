@@ -1,0 +1,8 @@
+# First of two ContactRegister documents, merged by a directory load.
+scope: isotc184sc4
+title:
+  - spelling: eng
+    value: Contacts
+contacts:
+  - urn: urn:edoxen:contact:isotc184sc4:jane-doe
+    kind: person

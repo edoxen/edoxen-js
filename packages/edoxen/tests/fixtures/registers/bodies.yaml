@@ -1,0 +1,15 @@
+# Minimal BodyRegister fixture (canonical 1.0 shape).
+scope: isotc184sc4
+bodies:
+  - code: ISO/TC 184/SC 4
+    kind: subcommittee
+    name:
+      - spelling: eng
+        value: Industrial data
+    parent_ref:
+      urn: urn:iso:tc184
+  - code: ISO/TC 184
+    kind: committee
+    name:
+      - spelling: eng
+        value: Automation systems and integration
