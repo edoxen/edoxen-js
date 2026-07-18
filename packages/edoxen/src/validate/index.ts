@@ -13,6 +13,11 @@ async function getAjv(): Promise<Ajv> {
   if (ajvInstance) return ajvInstance
   const { default: AjvCtor } = await import('ajv')
   ajvInstance = new AjvCtor({ allErrors: true, strict: false })
+  // Register string formats (date, date-time, email, uri, …). Without
+  // this ajv prints "unknown format … ignored" for every format in the
+  // bundled schemas on every compile — and silently skips validating them.
+  const { default: addFormats } = await import('ajv-formats')
+  addFormats(ajvInstance)
   return ajvInstance
 }
 
