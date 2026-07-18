@@ -1,0 +1,7 @@
+# Invalid ContactRegister: `bogus_property` is not in the schema and
+# ContactRegister sets additionalProperties: false.
+scope: isotc184sc4
+bogus_property: oops
+contacts:
+  - urn: urn:edoxen:contact:isotc184sc4:jane-doe
+    kind: person

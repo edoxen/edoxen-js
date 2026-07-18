@@ -31,6 +31,10 @@ export type {
   DecisionStatus,
   SourceUrlKind,
   UrlKind,
+  ContactRegister,
+  VenueRegister,
+  BodyRegister,
+  Body,
 } from './types/generated/edoxen.js'
 
 // VoteRecord, Motion, Voting, VotingCounts, PhysicalVenue,

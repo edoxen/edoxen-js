@@ -1,0 +1,18 @@
+# Minimal ContactRegister fixture (canonical 1.0 shape).
+scope: isotc184sc4
+title:
+  - spelling: eng
+    value: Contacts
+contacts:
+  - urn: urn:edoxen:contact:isotc184sc4:jane-doe
+    kind: person
+    name:
+      - spelling: eng
+        value:
+          formatted: Jane Doe
+  - urn: urn:edoxen:contact:isotc184sc4:john-smith
+    kind: person
+    name:
+      - spelling: eng
+        value:
+          formatted: John Smith

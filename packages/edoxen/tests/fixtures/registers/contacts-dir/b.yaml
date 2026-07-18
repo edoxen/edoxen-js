@@ -1,0 +1,5 @@
+# Second of two ContactRegister documents, merged by a directory load.
+scope: isotc184sc4
+contacts:
+  - urn: urn:edoxen:contact:isotc184sc4:john-smith
+    kind: person

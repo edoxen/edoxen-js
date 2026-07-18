@@ -1,0 +1,9 @@
+# Minimal VenueRegister fixture (canonical 1.0 shape).
+scope: isotc184sc4
+venues:
+  - urn: urn:edoxen:venue:isotc184sc4:krsel
+    kind: physical
+    unlocode: KRSEL
+    country_code: KR
+  - urn: urn:edoxen:venue:isotc184sc4:virtual
+    kind: virtual
