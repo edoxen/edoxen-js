@@ -97,3 +97,35 @@ export function buildVenueUrn(scope: string, id: string): Urn {
 export function buildDecisionUrn(scope: string, id: string): Urn {
   return formatScopedUrn('decision', scope, id)
 }
+
+// AgendaItem URN — hierarchical under the parent Meeting URN.
+// Format: `{meetingUrn}:agenda:{label}` (e.g.
+// `urn:oiml:ciml:meeting:ciml-60:agenda:6.2`). Independent of the
+// `urn:edoxen:` scoped scheme because agenda items derive their URN
+// from the parent meeting, not from a (scope, id) tuple.
+const AGENDA_SEGMENT = 'agenda'
+
+export interface AgendaItemUrnParts {
+  meetingUrn: string
+  label: string
+}
+
+export function buildAgendaItemUrn(meetingUrn: string, label: string): string {
+  if (!meetingUrn) throw new Error('meetingUrn is required')
+  if (!label) throw new Error('label is required')
+  return `${meetingUrn}:${AGENDA_SEGMENT}:${label}`
+}
+
+export function parseAgendaItemUrn(urn: string): AgendaItemUrnParts | null {
+  if (!urn) return null
+  const idx = urn.indexOf(`:${AGENDA_SEGMENT}:`)
+  if (idx === -1) return null
+  const meetingUrn = urn.slice(0, idx)
+  const label = urn.slice(idx + AGENDA_SEGMENT.length + 2)
+  if (!meetingUrn || !label) return null
+  return { meetingUrn, label }
+}
+
+export function isAgendaItemUrn(value: unknown): value is string {
+  return typeof value === 'string' && parseAgendaItemUrn(value) !== null
+}
