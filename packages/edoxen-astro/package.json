@@ -7,11 +7,17 @@
   "exports": {
     ".": "./src/integration.ts",
     "./components": "./src/components/index.ts",
+    "./components/chrome/*": "./src/components/chrome/*.astro",
+    "./config": "./src/config/index.ts",
     "./package.json": "./package.json"
   },
   "files": [
     "src"
   ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "peerDependencies": {
     "@edoxen/edoxen": "^0.1.0",
     "astro": "^4 || ^5"

@@ -1,0 +1,219 @@
+---
+// Header — default site chrome rendered at the top of every page.
+//
+// Configuration surface (all optional; sensible defaults ship with
+// the package):
+//   - siteConfig.title     → shown next to the logo
+//   - siteConfig.logo      → light/dark SVG paths under consumer's /public
+//   - siteConfig.nav       → top-nav entries (default: Meetings, Decisions, About)
+//   - siteConfig.githubUrl → optional GitHub link rendered at the right
+//
+// Override the entire component by creating
+// `src/components/chrome/Header.astro` in the consumer project —
+// Astro's resolution will prefer the local file over the package's.
+
+import type { NavItem, SiteConfig } from '../../config/index.js'
+import { defaultSiteConfig } from '../../config/index.js'
+
+interface Props {
+  config?: SiteConfig
+  currentPath?: string
+}
+
+const { config = defaultSiteConfig, currentPath = Astro.url.pathname } = Astro.props
+
+const isActive = (link: string | undefined): boolean => {
+  if (!link) return false
+  if (link === '/') return currentPath === '/'
+  return currentPath.startsWith(link)
+}
+---
+
+<header class="edoxen-header">
+  <div class="edoxen-header__container">
+    <a href="/" class="edoxen-header__brand" aria-label={config.title}>
+      <img
+        src={config.logo.light}
+        alt={config.logo.alt ?? config.title}
+        width="32"
+        height="32"
+        class="edoxen-header__logo edoxen-header__logo--light"
+        loading="eager"
+      />
+      {config.logo.dark && (
+        <img
+          src={config.logo.dark}
+          alt={config.logo.alt ?? config.title}
+          width="32"
+          height="32"
+          class="edoxen-header__logo edoxen-header__logo--dark"
+          loading="eager"
+        />
+      )}
+      <span class="edoxen-header__title">{config.title}</span>
+    </a>
+
+    <nav class="edoxen-header__nav" aria-label="Primary">
+      {config.nav.map((item: NavItem) => (
+        item.items ? (
+          <div class="edoxen-header__dropdown">
+            <button class="edoxen-header__dropdown-trigger" type="button">
+              {item.text}
+            </button>
+            <div class="edoxen-header__dropdown-menu" role="menu">
+              {item.items.map((sub: NavItem) => (
+                <a
+                  href={sub.link}
+                  role="menuitem"
+                  class:list={['edoxen-header__dropdown-link', { 'is-active': isActive(sub.link) }]}
+                >
+                  {sub.text}
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <a
+            href={item.link}
+            class:list={['edoxen-header__nav-link', { 'is-active': isActive(item.link) }]}
+          >
+            {item.text}
+          </a>
+        )
+      ))}
+    </nav>
+
+    {config.githubUrl && (
+      <a
+        class="edoxen-header__github"
+        href={config.githubUrl}
+        aria-label="GitHub repository"
+        target="_blank"
+        rel="noopener"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 .5C5.4.5 0 5.9 0 12.5c0 5.3 3.4 9.8 8.2 11.4.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2 0-.4-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2 1-.3 2-.4 3-.4s2 .1 3 .4c2.3-1.6 3.3-1.2 3.3-1.2.7 1.7.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.8-1.6 8.2-6.1 8.2-11.4C24 5.9 18.6.5 12 .5z"/>
+        </svg>
+      </a>
+    )}
+  </div>
+</header>
+
+<style>
+  .edoxen-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.92);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(12px);
+  }
+  :global(.dark) .edoxen-header {
+    background: rgba(12, 17, 24, 0.85);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+  .edoxen-header__container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .edoxen-header__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--edoxen-text, #0f172a);
+    font-family: var(--edoxen-font-display, Georgia, serif);
+    font-size: 1.15rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  :global(.dark) .edoxen-header__brand { color: var(--edoxen-text, #f1f5f9); }
+  .edoxen-header__logo { flex-shrink: 0; height: 32px; width: auto; }
+  .edoxen-header__logo--dark { display: none; }
+  :global(.dark) .edoxen-header__logo--light { display: none; }
+  :global(.dark) .edoxen-header__logo--dark { display: inline-block; }
+
+  .edoxen-header__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1;
+    justify-content: center;
+  }
+  .edoxen-header__nav-link,
+  .edoxen-header__dropdown-trigger {
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--edoxen-text-muted, #475569);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s, background 0.2s;
+    white-space: nowrap;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  :global(.dark) .edoxen-header__nav-link,
+  :global(.dark) .edoxen-header__dropdown-trigger {
+    color: var(--edoxen-text-muted, #cbd5e1);
+  }
+  .edoxen-header__nav-link:hover,
+  .edoxen-header__dropdown-trigger:hover {
+    color: var(--edoxen-brand, #0e7490);
+    background: rgba(14, 116, 144, 0.08);
+  }
+  .edoxen-header__nav-link.is-active,
+  .edoxen-header__dropdown-link.is-active {
+    color: var(--edoxen-brand, #0e7490);
+  }
+
+  .edoxen-header__dropdown { position: relative; }
+  .edoxen-header__dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--edoxen-surface, #ffffff);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 8px;
+    padding: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    min-width: 200px;
+  }
+  :global(.dark) .edoxen-header__dropdown-menu {
+    background: var(--edoxen-surface, #131a26);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  .edoxen-header__dropdown:hover .edoxen-header__dropdown-menu,
+  .edoxen-header__dropdown:focus-within .edoxen-header__dropdown-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .edoxen-header__dropdown-link {
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--edoxen-text-muted, #475569);
+    font-size: 0.9rem;
+  }
+
+  .edoxen-header__github {
+    color: var(--edoxen-text-muted, #475569);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+  }
+  .edoxen-header__github:hover { color: var(--edoxen-brand, #0e7490); }
+
+  @media (max-width: 768px) {
+    .edoxen-header__nav { display: none; }
+  }
+</style>

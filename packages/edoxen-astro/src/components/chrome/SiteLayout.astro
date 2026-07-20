@@ -1,0 +1,87 @@
+---
+// SiteLayout — the default page wrapper that every page extends.
+//
+// Renders the Header + page slot + Footer. The consumer can use this
+// as `<SiteLayout>` in their own layouts, or override it by creating
+// `src/components/chrome/SiteLayout.astro` in the consumer project —
+// Astro's resolution will prefer the local file over the package's.
+//
+// Usage in a consumer's `.astro` page:
+//
+//   ---
+//   import SiteLayout from '@edoxen/astro/components/chrome/SiteLayout.astro'
+//   ---
+//   <SiteLayout>
+//     <h1>Hello</h1>
+//   </SiteLayout>
+
+import Header from './Header.astro'
+import Footer from './Footer.astro'
+import type { SiteConfig } from '../../config/index.js'
+import { defaultSiteConfig } from '../../config/index.js'
+
+interface Props {
+  config?: SiteConfig
+  title?: string
+  description?: string
+}
+
+const {
+  config = defaultSiteConfig,
+  title,
+  description,
+} = Astro.props
+
+const pageTitle = title ? `${title} · ${config.title}` : config.title
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    {description && <meta name="description" content={description} />}
+    {config.fontsUrl && (
+      <link rel="stylesheet" href={config.fontsUrl} />
+    )}
+    <slot name="head" />
+  </head>
+  <body>
+    <Header config={config} />
+    <main class="edoxen-site-main">
+      <slot />
+    </main>
+    <Footer config={config} />
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --edoxen-brand: #0e7490;
+    --edoxen-brand-soft: rgba(14, 116, 144, 0.08);
+    --edoxen-text: #0f172a;
+    --edoxen-text-muted: #475569;
+    --edoxen-text-faint: #94a3b8;
+    --edoxen-surface: #ffffff;
+    --edoxen-font-display: Georgia, 'Times New Roman', serif;
+    --edoxen-font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --edoxen-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+  :global(.dark) {
+    --edoxen-brand: #67e8f9;
+    --edoxen-brand-soft: rgba(103, 232, 249, 0.08);
+    --edoxen-text: #f1f5f9;
+    --edoxen-text-muted: #cbd5e1;
+    --edoxen-text-faint: #64748b;
+    --edoxen-surface: #131a26;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--edoxen-surface);
+    color: var(--edoxen-text);
+    font-family: var(--edoxen-font-body);
+  }
+  .edoxen-site-main { min-height: 60vh; }
+</style>

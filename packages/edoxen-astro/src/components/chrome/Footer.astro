@@ -1,0 +1,99 @@
+---
+// Footer — auto-generated site footer.
+//
+// Configuration surface:
+//   - siteConfig.footer.message              → override default tagline
+//   - siteConfig.footer.copyright            → override default copyright line
+//   - siteConfig.footer.showEdoxenAttribution → toggle the 'Powered by Edoxen' link
+//
+// When `message` / `copyright` are unset, the package auto-generates
+// sensible defaults from the site title + current year. This means a
+// consumer can ship a working site with zero footer config — the
+// footer reflects their site title automatically.
+
+import type { SiteConfig } from '../../config/index.js'
+import { defaultSiteConfig, resolveFooter } from '../../config/index.js'
+
+interface Props {
+  config?: SiteConfig
+  /** Override the year used in the auto-generated copyright. Defaults to current year. */
+  year?: number
+}
+
+const { config = defaultSiteConfig, year = new Date().getFullYear() } = Astro.props
+const footer = resolveFooter(config, year)
+---
+
+<footer class="edoxen-footer">
+  <div class="edoxen-footer__container">
+    <div class="edoxen-footer__identity">
+      <p class="edoxen-footer__message" set:html={footer.message} />
+      <p class="edoxen-footer__copyright">{footer.copyright}</p>
+    </div>
+    {footer.showEdoxenAttribution && (
+      <a
+        class="edoxen-footer__attribution"
+        href="https://github.com/edoxen/edoxen"
+        target="_blank"
+        rel="noopener"
+      >
+        Powered by Edoxen
+      </a>
+    )}
+  </div>
+</footer>
+
+<style>
+  .edoxen-footer {
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    padding: 2rem 1.5rem;
+    margin-top: 4rem;
+  }
+  :global(.dark) .edoxen-footer {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+  .edoxen-footer__container {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .edoxen-footer__identity {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .edoxen-footer__message {
+    font-size: 0.85rem;
+    color: var(--edoxen-text-muted, #475569);
+    margin: 0;
+  }
+  .edoxen-footer__message :global(a) {
+    color: var(--edoxen-brand, #0e7490);
+  }
+  .edoxen-footer__copyright {
+    font-size: 0.8rem;
+    color: var(--edoxen-text-faint, #94a3b8);
+    margin: 0;
+  }
+  .edoxen-footer__attribution {
+    font-size: 0.85rem;
+    color: var(--edoxen-text-muted, #475569);
+    text-decoration: none;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .edoxen-footer__attribution:hover {
+    color: var(--edoxen-brand, #0e7490);
+    border-color: var(--edoxen-brand, #0e7490);
+    background: rgba(14, 116, 144, 0.06);
+  }
+  :global(.dark) .edoxen-footer__attribution {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+</style>
