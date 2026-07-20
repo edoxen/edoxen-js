@@ -3,12 +3,16 @@
 Monorepo for the Edoxen JavaScript packages:
 
 - **`edoxen`** — framework-agnostic TypeScript data layer. JSON-Schema-driven types, YAML loaders, transforms, search, URN, i18n, body, and validate helpers.
-- **`@edoxen/astro`** — Astro integration (primary UI package). Native `.astro` server components + SSR data loader.
 - **`@edoxen/vue`** — Vue 3 adapter for existing Vue/Vite consumers (tc154, tc184sc4, OIML).
+
+For the Astro-based browser package, see
+[`edoxen/browser`](https://github.com/edoxen/browser) — it lives in
+its own repo and ships `@edoxen/browser` (the canonical Edoxen site
+generator).
 
 ## Status
 
-Pre-v0.1. The data package (`edoxen`) is functional with smoke tests; the Astro and Vue packages are skeletons. See `TODO.js/` (git-ignored) for the per-PR breakdown.
+Pre-v0.1. The data package (`edoxen`) is functional with smoke tests; the Vue adapter is a skeleton. See `TODO.js/` (git-ignored) for the per-PR breakdown.
 
 ## Quick start
 
