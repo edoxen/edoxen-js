@@ -142,3 +142,7 @@ export {
   actionTypeColor,
   ACTION_TYPE_LABELS,
 } from './data/actionTypes.js'
+export {
+  meetingTypeLabel,
+  MEETING_TYPE_LABELS,
+} from './data/meetingTypes.js'
