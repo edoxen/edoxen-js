@@ -5,6 +5,12 @@ All notable changes to edoxen-js will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `meetingTypeLabel(type)` helper + `MEETING_TYPE_LABELS` constant in `@edoxen/edoxen`, mirroring the existing `actionTypeLabel` pattern. Covers all 17 `MeetingType` enum values from `Edoxen::Enums::MEETING_TYPE`. Humanize fallback for unknown values; safe for forward compatibility with future enum growth. Drift-detection spec (`tests/meetingTypes.spec.ts`) fails when the gem adds a value the labels map doesn't cover.
+
 ## [0.1.0] — 2026-07-07
 
 First public release of the Edoxen JavaScript library — a framework-agnostic TypeScript data layer for the Edoxen meeting/decision information model, plus a Vue 3 adapter for existing Vue/Vite consumers.

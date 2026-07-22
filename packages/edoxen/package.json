@@ -1,6 +1,6 @@
 {
   "name": "@edoxen/edoxen",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Framework-agnostic TypeScript data layer for the Edoxen meeting/decision information model. JSON-Schema-driven types, YAML loaders, transforms, search, URN, i18n, and validate helpers.",
   "type": "module",
   "main": "./dist/index.js",
